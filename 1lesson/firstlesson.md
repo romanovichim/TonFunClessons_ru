@@ -276,7 +276,7 @@ throw_if(35,in_msg_body.slice_bits() < 32);
 ##### Вызов recv_internal()
 
 Для вызова recv_internal() необходимо послать сообщение внутри сети TON. 
-С помощью [toncli sent](https://github.com/disintar/toncli/blob/master/docs/advanced/send_fift_internal.md)
+С помощью [toncli send](https://github.com/disintar/toncli/blob/master/docs/advanced/send_fift_internal.md)
 
 Напишем небольшой скрипт на Fift, который будет отправлять 32-битное сообщение в наш контракт.
 
