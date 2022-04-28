@@ -22,7 +22,7 @@ https://t.me/ton_learn
 
 ## Помощь по развитию
 
-Ton: 
+Ton:  EQAvmc9oVnOvLFlUAgeNmZNZoKeDg9vTEiAQxNFw-t5mh3m7
 
 Донаты пойдут на:
  - съемку видео уроков
