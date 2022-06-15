@@ -5,7 +5,7 @@
 
 ## Требования
 
-Для прохождения данного урока вам необходимо установить интерфейс для командной строки [toncli](https://github.com/disintar/toncli/blob/master/INSTALLATION.md) и пройти [первый урок](https://github.com/disintar/toncli/blob/master/INSTALLATION.md) .
+Для прохождения данного урока вам необходимо установить интерфейс для командной строки [toncli](https://github.com/disintar/toncli/blob/master/INSTALLATION.md) и пройти [первый урок](https://github.com/romanovichim/TonFunClessons_ru/blob/main/1lesson/firstlesson.md) .
 
 ##  Teсты для первого смарт-контракта
 

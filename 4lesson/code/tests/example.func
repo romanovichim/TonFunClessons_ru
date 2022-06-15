@@ -1,0 +1,138 @@
+;; Each test function must specify method_id
+;; Test functions method_id need to started from 0
+
+
+int equal_slices (slice a, slice b) asm "SDEQ";
+
+;; Each test functions must to be in pairs
+;; First funtion expect nothing in arguments
+;; But need to return:
+;;        function selector - which function to test, e.g. 0 for recv_internal, -1 recv_external, 85143 for seqno, and so on
+;;        tuple - stack values needed to be passed to function in tuple
+;;        c4 cell - start data of smart contract
+;;        c7 tuple / null
+;;        gas limit integer / null
+
+[int, tuple, cell, tuple, int] test_example_data() method_id(0) {
+    ;; Funtion to run (recv_internal)
+    int function_selector = 0;
+
+    cell my_address = begin_cell()
+                            .store_uint(1, 2) ;; 0x01 <- external
+                            .store_uint(5, 9) ;; len = 5
+                            .store_uint(7, 5) ;; let's say my address == "7"
+                            .end_cell();
+
+    cell their_address = begin_cell()
+                        .store_uint(1, 2) ;; 0x01 <- external
+                        .store_uint(5, 9) ;; len = 5
+                        .store_uint(8, 5) ;; let's say my address == "8"
+                        .end_cell();
+
+    slice message_body = begin_cell().store_uint(12345, 32).end_cell().begin_parse();
+
+    ;; Example contract message body
+    cell message = begin_cell()
+            .store_uint(0x6, 4)
+            .store_slice(their_address.begin_parse()) ;; src address
+            .store_slice(their_address.begin_parse()) ;; should be contract address
+            .store_grams(100)
+            .store_uint(0, 1 + 4 + 4 + 64 + 32 + 1 + 1)
+            .store_slice(message_body)
+            .end_cell();
+
+    ;; int balance, int msg_value, cell in_msg_full, slice in_msg_body
+    tuple stack = unsafe_tuple([12345, 100, message, message_body]);
+
+    return [function_selector, stack, my_address, get_c7(), null()];
+}
+
+
+;; After test data function
+;; We need to define test funtion
+;; It will accept:
+;;        exit code - exit code of runvm, here you can check errors / not
+;;        c4 cell - data of smart contract after runvm invokes
+;;        tuple - stack values of smart contract
+;;        c5 cell - here you can check all outcoming messages
+;;        gas - gas that was used
+;; By default test is passed
+;; You can use throw_if to fail test
+
+_ test_example(int exit_code, cell data, tuple stack, cell actions, int gas) method_id(1) {
+    throw_if(100, exit_code != 0);
+
+    slice actions = actions.begin_parse();
+    throw_if(101, actions~load_uint(32) != 0x0ec3c86d); 
+
+    throw_if(102, ~ slice_empty?(actions~load_ref().begin_parse())); 
+
+    slice msg = actions~load_ref().begin_parse();
+    throw_if(103, msg~load_uint(6) != 0x10);
+
+    slice send_to_address = msg~load_msg_addr();
+    slice expected_my_address = begin_cell().store_uint(1, 2).store_uint(5, 9).store_uint(7, 5).end_cell().begin_parse();
+
+    throw_if(104, ~ equal_slices(expected_my_address, send_to_address));
+    throw_if(105, msg~load_grams() != 0);
+    throw_if(106, msg~load_uint(1 + 4 + 4 + 64 + 32 + 1 + 1) != 0);
+
+    slice sender_address = msg~load_msg_addr();
+    slice expected_sender_address = begin_cell().store_uint(1, 2).store_uint(5, 9).store_uint(8, 5).end_cell().begin_parse();
+    throw_if(107, ~ equal_slices(sender_address, expected_sender_address));
+
+    slice fwd_msg = msg~load_ref().begin_parse();
+
+    throw_if(108, fwd_msg~load_uint(32) != 12345);
+    fwd_msg.end_parse();
+
+    msg.end_parse();
+}
+
+
+
+[int, tuple, cell, tuple, int] test_same_addr_data() method_id(2) {
+    ;; Funtion to run (recv_internal)
+    int function_selector = 0;
+
+    cell my_address = begin_cell()
+                            .store_uint(1, 2) 
+                            .store_uint(5, 9) 
+                            .store_uint(7, 5) 
+                            .end_cell();
+
+    slice message_body = begin_cell().store_uint(12345, 32).end_cell().begin_parse();
+
+
+    cell message = begin_cell()
+            .store_uint(0x6, 4)
+            .store_slice(my_address.begin_parse()) ;; src address
+            .store_slice(my_address.begin_parse()) ;; should be contract address
+            .store_grams(100)
+            .store_uint(0, 1 + 4 + 4 + 64 + 32 + 1 + 1)
+            .store_slice(message_body)
+            .end_cell();
+
+    tuple stack = unsafe_tuple([12345, 100, message, message_body]);
+
+    return [function_selector, stack, my_address, get_c7(), null()];
+}
+
+
+;; After test data function
+;; We need to define test funtion
+;; It will accept:
+;;        exit code - exit code of runvm, here you can check errors / not
+;;        c4 cell - data of smart contract after runvm invokes
+;;        tuple - stack values of smart contract
+;;        c5 cell - here you can check all outcoming messages
+;;        gas - gas that was used
+;; By default test is passed
+;; You can use throw_if to fail test
+
+_ test_same_addr(int exit_code, cell data, tuple stack, cell actions, int gas) method_id(3) {
+    throw_if(100, exit_code != 0);
+
+    throw_if(102, ~ slice_empty?(actions.begin_parse()));
+
+}
