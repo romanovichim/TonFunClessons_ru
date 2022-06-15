@@ -121,10 +121,10 @@
 Также сооберем еще один адрес, пускай он будет 8.
 
 	cell their_address = begin_cell()
-								.store_uint(1, 2)
-								.store_uint(5, 9) 
-								.store_uint(8, 5) 
-								.end_cell();
+					.store_uint(1, 2)
+					.store_uint(5, 9) 
+					.store_uint(8, 5) 
+					.end_cell();
 
 Для сборки сообщения осталось собрать слайс тела сообшения, положим туда число 12345
 
@@ -132,14 +132,14 @@
 
 Теперь осталось собрать само сообщение: 
 
-		cell message = begin_cell()
-				.store_uint(0x6, 4)
-				.store_slice(their_address.begin_parse()) 
-				.store_slice(their_address.begin_parse()) 
-				.store_grams(100)
-				.store_uint(0, 1 + 4 + 4 + 64 + 32 + 1 + 1)
-				.store_slice(message_body)
-				.end_cell();
+	cell message = begin_cell()
+			.store_uint(0x6, 4)
+			.store_slice(their_address.begin_parse()) 
+			.store_slice(their_address.begin_parse()) 
+			.store_grams(100)
+			.store_uint(0, 1 + 4 + 4 + 64 + 32 + 1 + 1)
+			.store_slice(message_body)
+			.end_cell();
 
 Отмечу, что адреса мы собирали в ячейки, соответственно чтобы хранить их в сообщении с помощью `store_slice()` нужно использовать `begin_parse()`, которая превратит ячейку в слайс.
 
