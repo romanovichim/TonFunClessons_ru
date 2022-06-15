@@ -121,10 +121,10 @@
 Также сооберем еще один адрес, пускай он будет 8.
 
 	cell their_address = begin_cell()
-					.store_uint(1, 2)
-					.store_uint(5, 9) 
-					.store_uint(8, 5) 
-					.end_cell();
+			.store_uint(1, 2)
+			.store_uint(5, 9) 
+			.store_uint(8, 5) 
+			.end_cell();
 
 Для сборки сообщения осталось собрать слайс тела сообшения, положим туда число 12345
 
