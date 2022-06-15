@@ -66,16 +66,16 @@
 		int function_selector = 0;
 
 		cell my_address = begin_cell()
-								.store_uint(1, 2)
-								.store_uint(5, 9) 
-								.store_uint(7, 5)
-								.end_cell();
+					.store_uint(1, 2)
+					.store_uint(5, 9) 
+					.store_uint(7, 5)
+					.end_cell();
 
 		cell their_address = begin_cell()
-							.store_uint(1, 2)
-							.store_uint(5, 9) 
-							.store_uint(8, 5) 
-							.end_cell();
+					.store_uint(1, 2)
+					.store_uint(5, 9) 
+					.store_uint(8, 5) 
+					.end_cell();
 
 		slice message_body = begin_cell().store_uint(12345, 32).end_cell().begin_parse();
 
@@ -105,10 +105,10 @@
 Чтобы проверить отправку нам нужны адреса с которых мы будем отправлять сообщения, пускай в данном примере у нас будет наш адрес `my_address` и их адрес `their_address`. Возникает вопрос, как должен выглядять адрес, учитывая что его нужно задачать типами FunC. Обратимся к [TL-B схеме](https://github.com/ton-blockchain/ton/blob/master/crypto/block/block.tlb) , а конкретно к строке 100, там начинаются описания адресов.
 
 		cell my_address = begin_cell()
-								.store_uint(1, 2)
-								.store_uint(5, 9) 
-								.store_uint(7, 5)
-								.end_cell();
+					.store_uint(1, 2)
+					.store_uint(5, 9) 
+					.store_uint(7, 5)
+					.end_cell();
 
 `.store_uint(1, 2)` - 0x01 внешний адрес;
 
@@ -121,10 +121,10 @@
 Также сооберем еще один адрес, пускай он будет 8.
 
 	cell their_address = begin_cell()
-			.store_uint(1, 2)
-			.store_uint(5, 9) 
-			.store_uint(8, 5) 
-			.end_cell();
+				.store_uint(1, 2)
+				.store_uint(5, 9) 
+				.store_uint(8, 5) 
+				.end_cell();
 
 Для сборки сообщения осталось собрать слайс тела сообшения, положим туда число 12345
 
