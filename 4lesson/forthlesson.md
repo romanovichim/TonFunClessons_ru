@@ -20,7 +20,6 @@
 
 Каждая тестовая функция должна указывать method_id. Тестовые функции method_id нужно запускать с 0.
 
-Кстати в следующих уроках мы уже будем писать тесты по новому, кто хочет забежать вперед - [прошу](https://github.com/disintar/toncli/blob/toncli-19/docs/advanced/func_tests_new.md).
 
 ##### Функция данных
 
@@ -104,11 +103,11 @@
 
 Чтобы проверить отправку нам нужны адреса с которых мы будем отправлять сообщения, пускай в данном примере у нас будет наш адрес `my_address` и их адрес `their_address`. Возникает вопрос, как должен выглядять адрес, учитывая что его нужно задачать типами FunC. Обратимся к [TL-B схеме](https://github.com/ton-blockchain/ton/blob/master/crypto/block/block.tlb) , а конкретно к строке 100, там начинаются описания адресов.
 
-		cell my_address = begin_cell()
-					.store_uint(1, 2)
-					.store_uint(5, 9) 
-					.store_uint(7, 5)
-					.end_cell();
+	cell my_address = begin_cell()
+				.store_uint(1, 2)
+				.store_uint(5, 9) 
+				.store_uint(7, 5)
+				.end_cell();
 
 `.store_uint(1, 2)` - 0x01 внешний адрес;
 
@@ -154,11 +153,11 @@
 
 Как вы могли заметить нам осталось собрать tuple и вернуть данные. В соответствии с сигнатурой recv_internal() нашего контракта положим туда следущие значения:
 
-		tuple stack = unsafe_tuple([12345, 100, message, message_body]);
+	tuple stack = unsafe_tuple([12345, 100, message, message_body]);
 
 Отмечу что возвращать мы уже будем `my_address`, это необходимо для проверки условия совпадения адресов.
 
-		return [function_selector, stack, my_address, get_c7(), null()];
+	return [function_selector, stack, my_address, get_c7(), null()];
 		
 Как можно видеть, в  с7 положили текущее состояние с7 с помощью `get_c7()` ,а в gas limit integer положим `null()`. 
 
@@ -211,10 +210,12 @@
 
 ![github ton](./img/send_action.PNG)
 
-		slice send_to_address = msg~load_msg_addr();
-		slice expected_my_address = begin_cell().store_uint(1, 2).store_uint(5, 9).store_uint(7, 5).end_cell().begin_parse();
+Продолжим:
 
-		throw_if(104, ~ equal_slices(expected_my_address, send_to_address));
+	slice send_to_address = msg~load_msg_addr();
+	slice expected_my_address = begin_cell().store_uint(1, 2).store_uint(5, 9).store_uint(7, 5).end_cell().begin_parse();
+
+	throw_if(104, ~ equal_slices(expected_my_address, send_to_address));
 
 Начинаем вычитывать сообщение. Проверяем адрес получателя, загрузив из сообщения адрес с помощью `load_msg_addr()` - которая загружает из слайса единственный префикс, который является допустимым MsgAddress.
 
@@ -239,9 +240,9 @@
 Осталось проверить значение в теле сообщения.  Сначала возьмем загрузим ссылку на ячейку  из сообщения с помощью `load_ref()` и преобразуем ей в слайс `begin_parse()`.  И соотвественно загрузим 32-ух битное значение(`load_uint` функция из стандартной бибилотеки FunC она загружает целое число n-бит без знака из слайса.) проверив его с нашим значением 12345. 
 
 
-		fwd_msg.end_parse();
+	fwd_msg.end_parse();
 
-		msg.end_parse();
+	msg.end_parse();
 		
 В самом конце мы мы проверяем после вычитки остался ли слайс пустым, как всего сообщения, так и тела сообщения из которого мы брали значение. Важно отметить, что  `end_parse()`  выдает исключение, если слайс не пустой, что очень удобно в тестах.
 
