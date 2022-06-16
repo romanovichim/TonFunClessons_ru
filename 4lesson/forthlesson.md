@@ -313,27 +313,27 @@
 
 Пример функции "разбирающей сообщение":
 
-(int, cell) extract_single_message(cell actions) impure inline method_id {
-    ;; ---------------- Parse actions list
-    ;; prev:^(OutList n)
-    ;; #0ec3c86d
-    ;; mode:(## 8)
-    ;; out_msg:^(MessageRelaxed Any)
-    ;; = OutList (n + 1);
-    slice cs = actions.begin_parse();
-    throw_unless(1010, cs.slice_refs() == 2);
-    
-    cell prev_actions = cs~load_ref();
-    throw_unless(1011, prev_actions.cell_empty?());
-    
-    int action_type = cs~load_uint(32);
-    throw_unless(1013, action_type == 0x0ec3c86d);
-    
-    int msg_mode = cs~load_uint(8);
-    throw_unless(1015, msg_mode == 64); 
-    
-    cell msg = cs~load_ref();
-    throw_unless(1017, cs.slice_empty?());
-    
-    return (msg_mode, msg);
-}
+	(int, cell) extract_single_message(cell actions) impure inline method_id {
+		;; ---------------- Parse actions list
+		;; prev:^(OutList n)
+		;; #0ec3c86d
+		;; mode:(## 8)
+		;; out_msg:^(MessageRelaxed Any)
+		;; = OutList (n + 1);
+		slice cs = actions.begin_parse();
+		throw_unless(1010, cs.slice_refs() == 2);
+		
+		cell prev_actions = cs~load_ref();
+		throw_unless(1011, prev_actions.cell_empty?());
+		
+		int action_type = cs~load_uint(32);
+		throw_unless(1013, action_type == 0x0ec3c86d);
+		
+		int msg_mode = cs~load_uint(8);
+		throw_unless(1015, msg_mode == 64); 
+		
+		cell msg = cs~load_ref();
+		throw_unless(1017, cs.slice_empty?());
+		
+		return (msg_mode, msg);
+	}
