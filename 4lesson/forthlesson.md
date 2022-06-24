@@ -172,7 +172,7 @@
 		throw_if(101, actions~load_uint(32) != 0x0ec3c86d); 
 
 
-		throw_if(102, ~ slice_empty?(actions~load_ref().begin_parse())); ;; only one action expected
+		throw_if(102, ~ slice_empty?(actions~load_ref().begin_parse())); 
 
 		slice msg = actions~load_ref().begin_parse();
 		throw_if(103, msg~load_uint(6) != 0x10);
@@ -210,6 +210,18 @@
 
 ![github ton](./img/send_action.PNG)
 
+
+Прежде чем двигаться дальше, надо разобраться как храняться данные в с5 из [документации](https://ton.org/docs/#/smart-contracts/tvm_overview?id=result-of-tvm-execution). В с5 храняться две ссылки на ячейки с последним действием в списке и ссылка ячейку с предыдущим действием соответственно.
+Подробнее как выпарсить actions полностью, будет описано в коде ниже в задании. Сейчас же главное, то что мы выгрузим первую ссылку из c5 и сразу же проверим, что она не пустая, чтобы далее можно было взять ячейку с сообщением.
+
+throw_if(102, ~ slice_empty?(actions~load_ref().begin_parse()));
+
+Проверяем мы с помощью `slice_empty?` из [стандартной библиотеки FunC](https://ton.org/docs/#/func/stdlib?id=slice_empty).
+
+Из ячейки "действий" нужно взять слайс сообщений, возьмем ссылку на ячейку с сообщением с помощью `load_ref()` и преобразуем её в слайс с помощью `begin_parse()`.
+
+	slice msg = actions~load_ref().begin_parse();
+	
 Продолжим:
 
 	slice send_to_address = msg~load_msg_addr();
@@ -295,7 +307,7 @@
 
 	}
 	
-Опять же проверям код возврата, функция создаст исключение, если код возврата не равен нулю.
+Опять же проверяем код возврата, функция создаст исключение, если код возврата не равен нулю.
 
 `throw_if(100, exit_code != 0);`
 

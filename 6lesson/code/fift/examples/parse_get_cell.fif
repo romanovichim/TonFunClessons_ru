@@ -1,0 +1,21 @@
+"Color.fif" include
+.s // prints stack
+
+// you will see that integer and cell slice are in stack
+
+// print seqno (it is just int in stack)
+."🤗 Seqno as int from " ^green ."GET" ^reset ." method is: "
+
+swap // get seqno as int on top of stack
+(dump) // dump to string
+type // print it to output
+cr // print endline
+
+<s dup 32 u@ // get seqno from cell
+swap ref@ // get ref on first cell
+<s 64 u@ // get message from second cell
+swap // get seqno from cell to top
+
+."🤗 Seqno as int from cell from " ^green ."GET" ^reset ." method is: " (dump) type cr
+
+."🥳 Message from ref cell: " (dump) type cr
