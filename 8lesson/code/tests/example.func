@@ -1,0 +1,287 @@
+int equal_slices (slice a, slice b) asm "SDEQ";
+
+
+tuple get_c7_now(int now) inline method_id {
+    return unsafe_tuple([unsafe_tuple([
+        0x076ef1ea,           ;; magic
+        0,                    ;; actions
+        0,                    ;; msgs_sent
+        now,                ;; unixtime
+        1,                    ;; block_lt
+        1,                    ;; trans_lt
+        239,                  ;; randseed
+        unsafe_tuple([1000000000, null()]),  ;; balance_remaining
+        null(),               ;; myself
+        get_config()          ;; global_config
+    ])]);
+}
+
+[int, tuple, cell, tuple, int] test_example_data() method_id(0) {
+    int function_selector = 0;
+
+    slice message_body = begin_cell()
+      .store_uint(1, 32) ;; add key
+      .store_uint(12345, 64) ;; query id
+      .store_uint(787788, 256) ;; key
+      .store_uint(1000, 64) ;; valid until
+      .store_uint(12345, 128) ;; 128-bit value
+      .end_cell().begin_parse();
+
+    cell message = begin_cell()
+            .store_uint(0x18, 6)
+            .store_uint(0, 2) ;; should be contract address
+            .store_grams(0)
+            .store_uint(0, 1 + 4 + 4 + 64 + 32 + 1 + 1)
+            .store_slice(message_body)
+            .end_cell();
+
+    tuple stack = unsafe_tuple([12345, 100, message, message_body]);
+
+    cell data = begin_cell().end_cell();
+
+    return [function_selector, stack, data, get_c7_now(100), null()];
+}
+
+
+_ test_example(int exit_code, cell data, tuple stack, cell actions, int gas) method_id(1) {
+    throw_if(100, exit_code != 0);
+}
+
+
+
+[int, tuple, cell, tuple, int] get_stored_value_data() method_id(2) {
+    int function_selector = 127977;
+
+    int key = 787788;
+
+    tuple stack = unsafe_tuple([key]);
+
+    return [function_selector, stack, get_prev_c4(), get_c7(), null()];
+}
+
+
+_ get_stored_value(int exit_code, cell data, tuple stack, cell actions, int gas) method_id(3) {
+    throw_if(100, exit_code != 0);
+
+    var valid_until = first(stack);
+    throw_if(102, valid_until != 1000);
+    var value = second(stack);
+    throw_if(101, value~load_uint(128) != 12345);
+}
+
+
+
+;; get not stored value
+
+[int, tuple, cell, tuple, int] get_not_stored_value_data() method_id(4) {
+    int function_selector = 127977;
+
+    int key = 787789; 
+
+    tuple stack = unsafe_tuple([key]);
+
+    return [function_selector, stack, get_prev_c4(), get_c7(), null()];
+}
+
+
+_ get_not_stored_value(int exit_code, cell data, tuple stack, cell actions, int gas) method_id(5) {
+    throw_if(100, exit_code == 0);
+}
+
+
+[int, tuple, cell, tuple, int] wrong_op_data() method_id(6) {
+
+   int function_selector = 0;
+
+   slice message_body = begin_cell()
+     .store_uint(3, 32) ;; add key
+     .store_uint(12345, 64) ;; query id
+     .store_uint(787788, 256) ;; key
+     .store_uint(1000, 64) ;; valid until
+     .store_uint(12345, 128) ;; 128-bit value
+     .end_cell().begin_parse();
+
+   cell message = begin_cell()
+           .store_uint(0x18, 6)
+           .store_uint(0, 2) ;; should be contract address
+           .store_grams(0)
+           .store_uint(0, 1 + 4 + 4 + 64 + 32 + 1 + 1)
+           .store_slice(message_body)
+           .end_cell();
+
+   tuple stack = unsafe_tuple([12345, 100, message, message_body]);
+
+   return [function_selector, stack, get_prev_c4(), get_c7(), null()];
+}
+
+
+_ wrong_op(int exit_code, cell data, tuple stack, cell actions, int gas) method_id(7) {
+    throw_if(100, exit_code == 0);
+}
+
+
+[int, tuple, cell, tuple, int] bad_query_data() method_id(8) {
+   int function_selector = 0;
+
+   slice message_body = begin_cell()
+     .store_uint(2, 32) ;; remove old
+     .store_uint(12345, 64) ;; query id
+     .store_uint(12345, 128) ;; 128-bit value
+     .end_cell().begin_parse();
+
+   cell message = begin_cell()
+           .store_uint(0x18, 6)
+           .store_uint(0, 2) ;; should be contract address
+           .store_grams(0)
+           .store_uint(0, 1 + 4 + 4 + 64 + 32 + 1 + 1)
+           .store_slice(message_body)
+           .end_cell();
+
+   tuple stack = unsafe_tuple([12345, 100, message, message_body]);
+
+   return [function_selector, stack, get_prev_c4(), get_c7(), null()];
+}
+
+
+_ bad_query(int exit_code, cell data, tuple stack, cell actions, int gas) method_id(9) {
+    throw_if(100, exit_code == 0);
+}
+
+
+[int, tuple, cell, tuple, int] remove_outdated_data() method_id(10) {
+   int function_selector = 0;
+
+   slice message_body = begin_cell()
+     .store_uint(2, 32) ;; remove old
+     .store_uint(12345, 64) ;; query id
+     .end_cell().begin_parse();
+
+   cell message = begin_cell()
+           .store_uint(0x18, 6)
+           .store_uint(0, 2) ;; should be contract address
+           .store_grams(0)
+           .store_uint(0, 1 + 4 + 4 + 64 + 32 + 1 + 1)
+           .store_slice(message_body)
+           .end_cell();
+
+   tuple stack = unsafe_tuple([12345, 100, message, message_body]);
+
+   return [function_selector, stack, get_prev_c4(), get_c7_now(1000), null()];
+}
+
+
+_ remove_outdated(int exit_code, cell data, tuple stack, cell actions, int gas) method_id(11) {
+    throw_if(100, exit_code != 0);
+}
+
+
+
+[int, tuple, cell, tuple, int] get_stored_value_after_remove_data() method_id(12) {
+    int function_selector = 127977;
+
+    int key = 787788;
+
+    tuple stack = unsafe_tuple([key]);
+
+    return [function_selector, stack, get_prev_c4(), get_c7(), null()];
+}
+
+
+_ get_stored_value_after_remove(int exit_code, cell data, tuple stack, cell actions, int gas) method_id(13) {
+    throw_if(100, exit_code != 0);
+
+    var valid_until = first(stack);
+    throw_if(102, valid_until != 1000);
+    var value = second(stack);
+    throw_if(101, value~load_uint(128) != 12345);
+}
+
+
+[int, tuple, cell, tuple, int] remove_outdated2_data() method_id(14) {
+   int function_selector = 0;
+
+   slice message_body = begin_cell()
+     .store_uint(2, 32) ;; remove old
+     .store_uint(12345, 64) ;; query id
+     .end_cell().begin_parse();
+
+   cell message = begin_cell()
+           .store_uint(0x18, 6)
+           .store_uint(0, 2) ;; should be contract address
+           .store_grams(0)
+           .store_uint(0, 1 + 4 + 4 + 64 + 32 + 1 + 1)
+           .store_slice(message_body)
+           .end_cell();
+
+   tuple stack = unsafe_tuple([12345, 100, message, message_body]);
+
+   return [function_selector, stack, get_prev_c4(), get_c7_now(1001), null()];
+}
+
+
+_ remove_outdated2(int exit_code, cell data, tuple stack, cell actions, int gas) method_id(15) {
+    throw_if(100, exit_code != 0);
+}
+
+
+[int, tuple, cell, tuple, int] get_stored_value_after_remove2_data() method_id(16) {
+    int function_selector = 127977;
+
+    int key = 787788;
+
+    tuple stack = unsafe_tuple([key]);
+
+    return [function_selector, stack, get_prev_c4(), get_c7(), null()];
+}
+
+
+_ get_stored_value_after_remove2(int exit_code, cell data, tuple stack, cell actions, int gas) method_id(17) {
+    throw_if(100, exit_code == 0);
+}
+
+
+[int, tuple, cell, tuple, int] get_not_stored_value2_data() method_id(18) {
+    ;; Funtion to run (recv_internal)
+    int function_selector = 127977;
+
+    int key = 787789;
+
+    tuple stack = unsafe_tuple([key]);
+
+    cell data = begin_cell().end_cell();
+
+    return [function_selector, stack, data, get_c7(), null()];
+}
+
+
+_ get_not_stored_value2(int exit_code, cell data, tuple stack, cell actions, int gas) method_id(19) {
+    throw_if(100, exit_code == 0);
+}
+
+;; remove outdated (but with now < all keys)
+
+[int, tuple, cell, tuple, int] remove_outdated3_data() method_id(20) {
+   int function_selector = 0;
+
+   slice message_body = begin_cell()
+     .store_uint(2, 32) ;; remove old
+     .store_uint(12345, 64) ;; query id
+     .end_cell().begin_parse();
+
+   cell message = begin_cell()
+           .store_uint(0x18, 6)
+           .store_uint(0, 2) ;; should be contract address
+           .store_grams(0)
+           .store_uint(0, 1 + 4 + 4 + 64 + 32 + 1 + 1)
+           .store_slice(message_body)
+           .end_cell();
+
+   tuple stack = unsafe_tuple([12345, 100, message, message_body]);
+
+   return [function_selector, stack, begin_cell().end_cell(), get_c7_now(1000), null()];
+}
+
+
+_ remove_outdated3(int exit_code, cell data, tuple stack, cell actions, int gas) method_id(21) {
+    throw_if(100, exit_code != 0);
+}
