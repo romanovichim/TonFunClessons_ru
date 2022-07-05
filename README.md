@@ -17,6 +17,9 @@
 | 10 | Разбираем стандарт NFT(Non-Fungible Token)  |   |   | ❌  |
 | 11 | FAQ |   |   | ❌  |
 
+## Lessons in English
+
+Уроки на английском [здесь](https://github.com/romanovichim/TonFunClessons_Eng), если вы хотите ускорить перевод уроков на англиский ниже  есть адреса донатов.
 
 ## Вопросы и обсуждение уроков
 
