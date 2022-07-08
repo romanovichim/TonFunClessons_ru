@@ -309,7 +309,7 @@ Toncli создал простой проект кошелька, в нем вы
 
 `<b b>` - создают Builder ячейки, подробнее в пункте [5.2](https://ton-blockchain.github.io/docs/fiftbase.pdf)
 
-`5 32 u` - кладем 32-битное unsigned integer 11
+`11 32 u` - кладем 32-битное unsigned integer 11
 
 ` // number` - однострочный комментарий
 
