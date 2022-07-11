@@ -237,9 +237,10 @@ Toncli создал простой проект кошелька, в нем вы
 
  
     int get_total() method_id {
-  	slice ds = get_data().begin_parse();
- 	 int total = ds~load_uint(64);
-  	return total;
+  		slice ds = get_data().begin_parse();
+ 	 	int total = ds~load_uint(64);
+		
+  		return total;
 	}
 	
 

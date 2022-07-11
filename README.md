@@ -19,7 +19,7 @@
 
 ## Lessons in English
 
-Lessons in English [здесь](https://github.com/romanovichim/TonFunClessons_Eng), if you want to speed up the translation of lessons into English, there are donation addresses below.
+Lessons in English [here](https://github.com/romanovichim/TonFunClessons_Eng), if you want to speed up the translation of lessons into English, there are donation addresses below.
 
 ## Вопросы и обсуждение уроков
 
