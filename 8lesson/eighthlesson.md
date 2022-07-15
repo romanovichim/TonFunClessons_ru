@@ -190,16 +190,6 @@
 		return [function_selector, stack, get_prev_c4(), get_c7(), null()];
 	}
 
-
-	_ get_stored_value(int exit_code, cell data, tuple stack, cell actions, int gas) method_id(3) {
-		throw_if(100, exit_code != 0);
-
-		var valid_until = first(stack);
-		throw_if(102, valid_until != 1000);
-		var value = second(stack);
-		throw_if(101, value~load_uint(128) != 12345);
-	}
-
 ## Разбираем
 
 		int function_selector = 127977;
@@ -433,25 +423,26 @@
 
 ##### Код get_stored_value_after_remove()
 
-	[int, tuple, cell, tuple, int] get_stored_value_data() method_id(2) {
-		int function_selector = 127977;
+[int, tuple, cell, tuple, int] get_stored_value_after_remove_data() method_id(12) {
+    int function_selector = 127977;
 
-		int key = 787788;
+    int key = 787788;
 
-		tuple stack = unsafe_tuple([key]);
+    tuple stack = unsafe_tuple([key]);
 
-		return [function_selector, stack, get_prev_c4(), get_c7(), null()];
-	}
+    return [function_selector, stack, get_prev_c4(), get_c7(), null()];
+}
 
 
-	_ get_stored_value(int exit_code, cell data, tuple stack, cell actions, int gas) method_id(3) {
-		throw_if(100, exit_code != 0);
+_ get_stored_value_after_remove(int exit_code, cell data, tuple stack, cell actions, int gas) method_id(13) {
+    throw_if(100, exit_code != 0);
 
-		var valid_until = first(stack);
-		throw_if(102, valid_until != 1000);
-		var value = second(stack);
-		throw_if(101, value~load_uint(128) != 12345);
-	}
+    var valid_until = first(stack);
+    throw_if(102, valid_until != 1000);
+    var value = second(stack);
+    throw_if(101, value~load_uint(128) != 12345);
+}
+
 
 ## Тестируем удаление устаревших данных
 
