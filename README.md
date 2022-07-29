@@ -13,7 +13,7 @@
 | 6 | Тестируем флаги и хранение данных в контракте | Различные тесты для сообщений с флагами и хранения данных в регистре с4  | [LINK](./6lesson/sixthlesson.md)  | ✅  |
 | 7 | HashMap хранилище  | Работа со Словарями(hashmap): хранение, удаление, поиск  | [LINK](./7lesson/seventhlesson.md) | ✅   |
 | 8 | Тестируем HashMap хранилище  | Тестируем HashMap(словари), особые функции toncli для тестирования, регистр с7  | [LINK](./8lesson/eighthlesson.md)  | ✅  |
-| 9 | Разбираем стандарт Jetton(Fungible Token)  | Токены, стандарты, стандарт Jetton, StateInit, воркчейны  | [LINK](./9lesson/ningthlesson.md)  | ✅  |
+| 9 | Разбираем стандарт Jetton(Fungible Token)  | Токены, стандарты, стандарт Jetton, StateInit, воркчейны  | [LINK](./9lesson/ninthlesson.md)  | ✅  |
 | 10 | Разбираем стандарт NFT(Non-Fungible Token)  |   |   | ❌  |
 | 11 | FAQ |   |   | ❌  |
 
