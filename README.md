@@ -14,7 +14,7 @@
 | 7 | HashMap хранилище  | Работа со Словарями(hashmap): хранение, удаление, поиск  | [LINK](./7lesson/seventhlesson.md) | ✅   |
 | 8 | Тестируем HashMap хранилище  | Тестируем HashMap(словари), особые функции toncli для тестирования, регистр с7  | [LINK](./8lesson/eighthlesson.md)  | ✅  |
 | 9 | Разбираем стандарт Jetton(Fungible Token)  | Токены, стандарты, стандарт Jetton, StateInit, воркчейны  | [LINK](./9lesson/ninthlesson.md)  | ✅  |
-| 10 | Разбираем стандарт NFT(Non-Fungible Token)  | NFT, стандарт NFT, коллекции и отдельные NFT  | [LINK](./10lesson/tenthlesson.md  | ✅  |
+| 10 | Разбираем стандарт NFT(Non-Fungible Token)  | NFT, стандарт NFT, коллекции и отдельные NFT  | [LINK](./10lesson/tenthlesson.md)  | ✅  |
 | 11 | FAQ |   |   | ❌  |
 
 ## Lessons in English
