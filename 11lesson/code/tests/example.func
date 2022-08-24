@@ -1,0 +1,90 @@
+() set_default_initial_data() impure {
+  set_data(begin_cell().store_uint(0, 64).end_cell());
+}
+
+int __test_example() {
+    set_default_initial_data();
+
+    cell message = begin_cell().store_uint(10, 32).end_cell();
+    var (int gas_used1, _) = invoke_method(recv_internal, [message.begin_parse()]);
+    var (int gas_used2, stack) = invoke_method(get_total, []);
+    [int total] = stack;
+    throw_if(101, total != 10);
+    return gas_used1 + gas_used2;
+}
+
+int __test_no_initial_data_should_fail() {
+    int gas_used = invoke_method_expect_fail(get_total, []);
+    return gas_used;
+}
+
+int __test_set_data() {
+  return __test_example();
+}
+
+int __test_data_from_prev_test() {
+    set_data(get_prev_c4());
+    var (int gas_used, stack) = invoke_method(get_total, []);
+    var [total] = stack;
+    throw_if(102, total != 10);
+    return gas_used;
+}
+
+
+int __test_throw_doesnt_corrupt_stack() {
+    int check_stack_is_not_corrupted = 123;
+    int gas_used = invoke_method_expect_fail(get_total, []);
+    throw_if(102, check_stack_is_not_corrupted != 123);
+    return gas_used;
+}
+
+
+(int, cell) build_test_cell(int x, int y) {
+  return (12345, begin_cell().store_uint(x, 64).store_uint(y, 64).end_cell());
+}
+
+int __test_not_integer_return_types() {
+  var (int gas_used, stack) = invoke_method(build_test_cell, [100, 500]);
+  [int res, cell c] = stack;
+  throw_if(102, res != 12345);
+  slice s = c.begin_parse();
+  throw_if(103, s~load_uint(64) != 100);
+  throw_if(104, s~load_uint(64) != 500);
+  return gas_used;
+}
+
+() empty_method() inline method_id {
+
+}
+
+int __test_empty_method_gas_consumption() method_id {
+  var (int gas_used, _) = invoke_method(empty_method, []);
+  throw_if(101, gas_used < 500);
+  throw_if(102, gas_used > 700);
+  return gas_used;
+}
+
+[int, int, int] __test_can_return_complex_type_from_test() {
+  set_default_initial_data();
+
+  cell message = begin_cell().store_uint(10, 32).end_cell();
+
+  (int gas_used1, _) = invoke_method(recv_internal, [message.begin_parse()]);
+  (int gas_used2, _) = invoke_method(recv_internal, [message.begin_parse()]);
+  (int gas_used3, _) = invoke_method(recv_internal, [message.begin_parse()]);
+
+  return [gas_used1, gas_used2, gas_used3];
+}
+
+
+(int, int, int) __test_can_return_more_than_one_stack_entry() {
+  return (1, 2, 3);
+}
+
+int stack_depth() asm "DEPTH";
+
+int __test_check_stack_depth_after_prev_test() {
+  int depth = stack_depth();
+  throw_if(100, depth != 0);
+  return 0;
+}

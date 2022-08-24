@@ -1,0 +1,30 @@
+
+
+;; recv_internal - обращение к контракту из TON
+;; impure - функция изменяет данные смарт-контракта 
+;; slice - некий указатель на ячейку из которого можно читать данные
+() recv_internal(slice in_msg_body) impure {
+  ;;slice_bits() возвращает количество битов в slice
+  ;;throw_if исключение
+  int n = in_msg_body~load_uint(32);
+
+  ;;get_data берет ячейку из storage c4 регистра 
+  ;;begin_parse ячейку преобразует в slice 
+  slice ds = get_data().begin_parse();
+  ;; загружаем из слайса uint битности 64
+  int total = ds~load_uint(64);
+
+  total += n;
+		
+  ;; устанавливает значение в ячейку
+  ;; begin_cell создаем builder end_cell превращаем builder в end_cell
+  ;;
+  set_data(begin_cell().store_uint(total, 64).end_cell());
+}
+
+;; testable
+int get_total() method_id {
+  slice ds = get_data().begin_parse();
+  int total = ds~load_uint(64);
+  return total;
+}
