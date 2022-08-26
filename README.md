@@ -17,7 +17,7 @@
 | 9 | Разбираем стандарт Jetton(Fungible Token)  | Токены, стандарты, стандарт Jetton, StateInit, воркчейны  | [LINK](./9lesson/ninthlesson.md)  | ✅  |
 | 10 | Разбираем стандарт NFT(Non-Fungible Token)  | NFT, стандарт NFT, коллекции и отдельные NFT  | [LINK](./10lesson/tenthlesson.md)  | ✅  |
 || **Round 2**   |||||
-| 11 | Введение в разработку смарт-контрактов в ТОН | | | ❌  |
+| 11 | Введение в разработку смарт-контрактов в ТОН | Что такое блокчейн, TON, смарт-контракты  | [LINK](./intro/intro.md) | ✅  |
 | 12 | Новые тесты Toncli | Логика новых тестов на FunC ,cтруктура новых тестов | [LINK](./11lesson/11lesson.md) | ✅  |
 | 13 | Learn FunC in 15 minutes | | | ❌  |
 
