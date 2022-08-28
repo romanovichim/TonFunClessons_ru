@@ -33,7 +33,7 @@
 
 В соответствии с  документацией [виртуальной машины TON - TVM](https://ton-blockchain.github.io/docs/tvm.pdf), когда на счете в одной из цепочек TON происходит какое-то событие, оно вызывает транзакцию. 
 
-Каждая транзакция состоит из до 5 этапов. Подробнее [здесь](https://ton.org/docs/#/smart-contracts/tvm_overview?id=transactions-and-phases).
+Каждая транзакция состоит из не более чем 5 этапов. Подробнее [здесь](https://ton.org/docs/#/smart-contracts/tvm_overview?id=transactions-and-phases).
 
 Нас интересует **Compute phase**. А если быть конкретнее, что "в стеке" при инициализации. Для обычных транзакций, вызванных сообщением, начальное состояние стека выглядит следующим [образом](https://ton.org/docs/#/smart-contracts/tvm_overview?id=initialization-of-tvm):
 
