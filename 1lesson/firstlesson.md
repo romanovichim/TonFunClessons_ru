@@ -57,7 +57,7 @@ Toncli создал простой проект кошелька, в нем вы
  
 Под наши условия подходит `recv_internal()`
 
-В файле `code.fc` пропишем:
+В файле `code.func` пропишем:
 
     () recv_internal(slice in_msg_body) impure {
     ;; здесь будет код
