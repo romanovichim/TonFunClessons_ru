@@ -48,3 +48,7 @@ ERC-20 USDC: 0x996d0b3438bC0dD77C2A87c632B02686669c1AF0
  - съемку видео уроков
  - переводы текущих уроков на другие языки 
  - создание новых
+ 
+## LICENSE
+
+CC BY-NC-ND 4.0 https://creativecommons.org/licenses/by-nc-nd/4.0/
