@@ -1,0 +1,10 @@
+#!/usr/bin/fift -s
+"TonUtil.fif" include
+"Asm.fif" include
+
+."first contract:" cr
+
+"contract.fif" include
+2 boc+>B dup Bx. cr cr
+
+
