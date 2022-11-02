@@ -412,7 +412,7 @@ Content по стандарту можно посмотреть [здесь](htt
 
 В случае успеха в https://testnet.tonscan.org/ можем увидеть следущую картину: 
 
-![](https://pandao.github.io/editor.md/examples/images/tnscn.PNG)
+![tnscn](./img/tnscn.PNG)
 
 Наше сообщение и обраное сообщение уведомление.
 
@@ -469,9 +469,9 @@ Content по стандарту можно посмотреть [здесь](htt
 		log.Println("token balance:", tokenBalance.String())
 	}
 
-В случае успеха в https://testnet.tonscan.org/ можем увидеть следущую картину: 
+В случае успеха можем увидеть следущую картину: 
 
-![](https://pandao.github.io/editor.md/examples/images/wg.PNG)
+![cli](./img/wg.PNG)
 
 >  Токенов меньше чем мы отправили Toncoin так как есть комиссии, плюс контракту нужно отправить сообщение обратно.
 
