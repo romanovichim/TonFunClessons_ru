@@ -63,7 +63,7 @@
 - c5 cell - для проверки исходящих сообщений
 - gas - газ, который был использован
 
-[Коды возврата TVM](https://ton.org/docs/#/smart-contracts/tvm_exit_codes)
+[Коды возврата TVM](https://ton-blockchain.github.io/docs/#/smart-contracts/tvm_exit_codes)
 
 
 ## Тестируем сохранение адресов с op = 1
@@ -158,7 +158,7 @@
 
 	slice message_body = begin_cell().store_uint(1, 32).store_uint(12345, 64).store_slice(stored_address.begin_parse()).end_cell().begin_parse();
 
-Теперь осталось собрать само сообщение, но как отправить сообщение на адрес смарт-контракта. Для этого будем использовать `addr_none`, так как в соответствии с [документацией SENDRAWMSG](https://ton.org/docs/#/func/stdlib?id=send_raw_message) вместо него автоматически подставиться текущий адрес смарт-контракта. Получим:
+Теперь осталось собрать само сообщение, но как отправить сообщение на адрес смарт-контракта. Для этого будем использовать `addr_none`, так как в соответствии с [документацией SENDRAWMSG](https://ton-blockchain.github.io/docs/#/func/stdlib?id=send_raw_message) вместо него автоматически подставиться текущий адрес смарт-контракта. Получим:
 
     cell message = begin_cell()
             .store_uint(0x6, 4)
@@ -489,7 +489,7 @@
 
 	slice all_actions = actions.begin_parse();
 	
-Теперь вспомним как хранятся  данные в c5 в соответствии с [документацией](https://ton.org/docs/#/smart-contracts/tvm_overview?id=result-of-tvm-execution).
+Теперь вспомним как хранятся  данные в c5 в соответствии с [документацией](https://ton-blockchain.github.io/docs/#/smart-contracts/tvm_overview?id=result-of-tvm-execution).
 
 Храниться там список из двух ссылок на ячейки две ссылки на ячейки с последним действием в списке и ссылка ячейку с предыдущим действием соответственно. (В конце урока будет приведен код, который показывает как распарсить `actions` полностью, надеюсь это поможет)
 
@@ -509,7 +509,7 @@
 
 	throw_if(104, ~ equal_slices(sender_address.begin_parse(), send_to_address));
 	
-С помощью `load_grams()`  и `load_uint()`  из [стандартной библиотеки](https://ton.org/docs/#/func/stdlib?id=load_grams) проверяем кол-во Tоn в сообщении не равно 0 и прочие служебные поля, которые можно посмотреть в [схеме сообщения](https://ton.org/docs/#/smart-contracts/messages), вычитывая их из сообщения.
+С помощью `load_grams()`  и `load_uint()`  из [стандартной библиотеки](https://ton-blockchain.github.io/docs/#/func/stdlib?id=load_grams) проверяем кол-во Tоn в сообщении не равно 0 и прочие служебные поля, которые можно посмотреть в [схеме сообщения](https://ton-blockchain.github.io/docs/#/smart-contracts/messages), вычитывая их из сообщения.
 
 	throw_if(105, msg~load_grams() != 0);
     throw_if(106, msg~load_uint(1 + 4 + 4 + 64 + 32 + 1 + 1) != 0);

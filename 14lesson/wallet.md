@@ -72,7 +72,7 @@
 
 ### "Активируем" кошелек
 
-В соответствии с [документацией](https://ton.org/docs/#/payment-processing/overview?id=deploying-wallet) на полученный адрес необходимо отправить Toncoin. В тестовой сети для этого есть бот https://t.me/testgiver_ton_bot . По основной сети, приложу официальную [страницу](https://ton.org/buy-toncoin).
+В соответствии с [документацией](https://ton-blockchain.github.io/docs/#/payment-processing/overview?id=deploying-wallet) на полученный адрес необходимо отправить Toncoin. В тестовой сети для этого есть бот https://t.me/testgiver_ton_bot . По основной сети, приложу официальную [страницу](https://ton-blockchain.github.io/buy-toncoin).
 
 ### Получаем баланс
 
@@ -226,7 +226,7 @@
 - boc+>B - сериализует в формат boc
 - cr - выводит в строку значение
 
-> Запустить скрипт можно либо с помощью знакомого нам toncli, а именно `toncli fift run` , либо как описано [здесь](https://ton.org/docs/#/compile?id=fift).
+> Запустить скрипт можно либо с помощью знакомого нам toncli, а именно `toncli fift run` , либо как описано [здесь](https://ton-blockchain.github.io/docs/#/compile?id=fift).
 
 Пример скрипта, находится в файле `print-hex.fif`.
 

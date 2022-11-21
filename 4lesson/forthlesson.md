@@ -48,7 +48,7 @@
 - c5 cell - для проверки исходящих сообщений
 - gas - газ, который был использован
 
-[Коды возврата TVM](https://ton.org/docs/#/smart-contracts/tvm_exit_codes)
+[Коды возврата TVM](https://ton-blockchain.github.io/docs/#/smart-contracts/tvm_exit_codes)
 
 ## Приступим к написанию тестов
 
@@ -215,12 +215,12 @@
 ![github ton](./img/send_action.PNG)
 
 
-Прежде чем двигаться дальше, надо разобраться как храняться данные в с5 из [документации](https://ton.org/docs/#/smart-contracts/tvm_overview?id=result-of-tvm-execution). В с5 храняться две ссылки на ячейки с последним действием в списке и ссылка ячейку с предыдущим действием соответственно.
+Прежде чем двигаться дальше, надо разобраться как храняться данные в с5 из [документации](https://ton-blockchain.github.io/docs/#/smart-contracts/tvm_overview?id=result-of-tvm-execution). В с5 храняться две ссылки на ячейки с последним действием в списке и ссылка ячейку с предыдущим действием соответственно.
 Подробнее как достать данные из actions полностью, будет описано в коде ниже в задании. Сейчас же главное, то что мы выгрузим первую ссылку из c5 и сразу же проверим, что она не пустая, чтобы далее можно было взять ячейку с сообщением.
 
 throw_if(102, ~ slice_empty?(actions~load_ref().begin_parse()));
 
-Проверяем мы с помощью `slice_empty?` из [стандартной библиотеки FunC](https://ton.org/docs/#/func/stdlib?id=slice_empty).
+Проверяем мы с помощью `slice_empty?` из [стандартной библиотеки FunC](https://ton-blockchain.github.io/docs/#/func/stdlib?id=slice_empty).
 
 Из ячейки "действий" нужно взять слайс сообщений, возьмем ссылку на ячейку с сообщением с помощью `load_ref()` и преобразуем её в слайс с помощью `begin_parse()`.
 
@@ -242,7 +242,7 @@ throw_if(102, ~ slice_empty?(actions~load_ref().begin_parse()));
     throw_if(105, msg~load_grams() != 0);
     throw_if(106, msg~load_uint(1 + 4 + 4 + 64 + 32 + 1 + 1) != 0);
 	
-С помощью `load_grams()`  и `load_uint()`  из [стандартной библиотеки](https://ton.org/docs/#/func/stdlib?id=load_grams) проверяем кол-во Tоn в сообщении не равно 0 и прочие служебые поля, которые можно посмотреть в [схеме сообщения](https://ton.org/docs/#/smart-contracts/messages), вычитывая их из сообщения.
+С помощью `load_grams()`  и `load_uint()`  из [стандартной библиотеки](https://ton-blockchain.github.io/docs/#/func/stdlib?id=load_grams) проверяем кол-во Tоn в сообщении не равно 0 и прочие служебые поля, которые можно посмотреть в [схеме сообщения](https://ton-blockchain.github.io/docs/#/smart-contracts/messages), вычитывая их из сообщения.
 
 	slice sender_address = msg~load_msg_addr();
 	slice expected_sender_address = begin_cell().store_uint(1, 2).store_uint(5,9).store_uint(8, 5).end_cell().begin_parse();
@@ -319,7 +319,7 @@ throw_if(102, ~ slice_empty?(actions~load_ref().begin_parse()));
 
 `throw_if(102, ~ slice_empty?(actions.begin_parse()));`
 
-Так как прокси контракт не должен отправлять сообщение, то мы просто проверяем, что слайс пустой с помощью `slice_empty?`, подробнее о функции [здесь](https://ton.org/docs/#/func/stdlib?id=slice_empty) .
+Так как прокси контракт не должен отправлять сообщение, то мы просто проверяем, что слайс пустой с помощью `slice_empty?`, подробнее о функции [здесь](https://ton-blockchain.github.io/docs/#/func/stdlib?id=slice_empty) .
 
 ## Задание
 

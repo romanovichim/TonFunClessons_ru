@@ -84,7 +84,7 @@
 
 В данном смарт-контракте, нам понадобиться по адресу владельца воспроизводить адрес смарт-контракта с отдельной НФТ этого владельца. Для этого будем использовать тот же "трюк", что и в примерах по Jetton.
 
-Напомню, если мы изучим [документацию](https://ton.org/docs/#/howto/step-by-step?id=_3-compiling-a-new-smart-contract), того как компилируется смарт-контракт.
+Напомню, если мы изучим [документацию](https://ton-blockchain.github.io/docs/#/howto/step-by-step?id=_3-compiling-a-new-smart-contract), того как компилируется смарт-контракт.
 
 Мы можем увидеть следующее:
 
@@ -193,9 +193,9 @@ workchain()  - это вспомогательная функция из `params
 
 В соответствии с документацией [виртуальной машины TON - TVM](https://ton-blockchain.github.io/docs/tvm.pdf), когда на счете в одной из цепочек TON происходит какое-то событие, оно вызывает транзакцию. 
 
-Каждая транзакция состоит из до 5 этапов. Подробнее [здесь](https://ton.org/docs/#/smart-contracts/tvm_overview?id=transactions-and-phases).
+Каждая транзакция состоит из до 5 этапов. Подробнее [здесь](https://ton-blockchain.github.io/docs/#/smart-contracts/tvm_overview?id=transactions-and-phases).
 
-Нас интересует **Compute phase**. А если быть конкретнее, что "в стеке" при инициализации. Для обычных транзакций, вызванных сообщением, начальное состояние стека выглядит следующим [образом](https://ton.org/docs/#/smart-contracts/tvm_overview?id=initialization-of-tvm):
+Нас интересует **Compute phase**. А если быть конкретнее, что "в стеке" при инициализации. Для обычных транзакций, вызванных сообщением, начальное состояние стека выглядит следующим [образом](https://ton-blockchain.github.io/docs/#/smart-contracts/tvm_overview?id=initialization-of-tvm):
 
 5 элементов:
 - Баланс смарт-контракта (в наноТонах)
@@ -357,9 +357,9 @@ workchain()  - это вспомогательная функция из `params
 
 > Подробно на работе со словарями(Hashmaps) мы останавливались в седьмом уроке
 
-Так же считаю важным отметить, что "разовый" массовый деплой в TON ограничен. В [TVM](https://ton.org/docs/#/smart-contracts/tvm_overview?id=tvm-is-stack-machine), количество выходных действий в одной транзакции должно быть `<=255`. 
+Так же считаю важным отметить, что "разовый" массовый деплой в TON ограничен. В [TVM](https://ton-blockchain.github.io/docs/#/smart-contracts/tvm_overview?id=tvm-is-stack-machine), количество выходных действий в одной транзакции должно быть `<=255`. 
 
-> Напомню, что в FunС есть три [цикла](https://ton.org/docs/#/func/statements?id=loops): `repeat`,`until`,`while` 
+> Напомню, что в FunС есть три [цикла](https://ton-blockchain.github.io/docs/#/func/statements?id=loops): `repeat`,`until`,`while` 
 
 Создадим счетчик `counter`, который мы будем использовать в цикле, а также выгрузим ссылку на список NFT.
 
@@ -588,7 +588,7 @@ workchain()  - это вспомогательная функция из `params
 - `slice to_address`  - адрес куда отправить сообщение
 - `int amount` - количество TON
 - `int op` - код `op` для идентификации операции 
-- `int query_id` - query_id, используемое во всех внутренних сообщениях типа «запрос-ответ». [Подробнее](https://ton.org/docs/#/howto/smart-contract-guidelines?id=smart-contract-guidelines)
+- `int query_id` - query_id, используемое во всех внутренних сообщениях типа «запрос-ответ». [Подробнее](https://ton-blockchain.github.io/docs/#/howto/smart-contract-guidelines?id=smart-contract-guidelines)
 - `builder payload`  - некая полезная нагрузка, которую мы хотим передать с сообщением
 - `int send_mode` - Режим отправки сообщения, подробнее о режимах можно прочитать в третьем уроке
 
@@ -630,13 +630,13 @@ workchain()  - это вспомогательная функция из `params
 
 Итак, функция будет принимать:
 
-`int my_balance` - Баланс (после зачисления стоимости входящего сообщения) смарт-контракта (в наноТонах). В соответствии с [Compute phase](https://ton.org/docs/#/smart-contracts/tvm_overview?id=initialization-of-tvm)
+`int my_balance` - Баланс (после зачисления стоимости входящего сообщения) смарт-контракта (в наноТонах). В соответствии с [Compute phase](https://ton-blockchain.github.io/docs/#/smart-contracts/tvm_overview?id=initialization-of-tvm)
 `int index`  - индекс отдельной NFT коллекции
 `slice collection_address` - адрес смарт-контракта коллекции
 `slice owner_address` - адрес владельца
 `cell content` - ячейка с контентом NFT
 `slice sender_address` - адрес отправителя сообщения о смене владельца
-`int query_id` - query_id, используемое во всех внутренних сообщениях типа «запрос-ответ». [Подробнее](https://ton.org/docs/#/howto/smart-contract-guidelines?id=smart-contract-guidelines)
+`int query_id` - query_id, используемое во всех внутренних сообщениях типа «запрос-ответ». [Подробнее](https://ton-blockchain.github.io/docs/#/howto/smart-contract-guidelines?id=smart-contract-guidelines)
 `slice in_msg_body` - то, что останется от тела сообщения в `recv_internal()`, внутри необходимы нам адреса адреса
 `int fwd_fees` - транзакционные издержки сообщения отправленного в `recv_internal()`, здесь будет использоваться для оценки необходимо значение TON для осуществления операции передачи владением
 
@@ -689,7 +689,7 @@ workchain()  - это вспомогательная функция из `params
 		int forward_amount = in_msg_body~load_coins();
 	}
 
-Далее идет вычисление значения Ton, которое нужно будет отправить обратно на адрес для нотификации об изменении владельца. Останавливаться здесь не будет, чтобы не затягивать урок, а чтобы проще понять код, которые будет ниже советую ознакомиться с [Transaction fees](https://ton.org/docs/#/smart-contracts/fees). Также отмечу, что мы учитываем при расчете, что адрес может быть `addr_none`.
+Далее идет вычисление значения Ton, которое нужно будет отправить обратно на адрес для нотификации об изменении владельца. Останавливаться здесь не будет, чтобы не затягивать урок, а чтобы проще понять код, которые будет ниже советую ознакомиться с [Transaction fees](https://ton-blockchain.github.io/docs/#/smart-contracts/fees). Также отмечу, что мы учитываем при расчете, что адрес может быть `addr_none`.
 
     int rest_amount = my_balance - min_tons_for_storage();
     if (forward_amount) {
@@ -754,9 +754,9 @@ workchain()  - это вспомогательная функция из `params
 
 В соответствии с документацией [виртуальной машины TON - TVM](https://ton-blockchain.github.io/docs/tvm.pdf), когда на счете в одной из цепочек TON происходит какое-то событие, оно вызывает транзакцию. 
 
-Каждая транзакция состоит из до 5 этапов. Подробнее [здесь](https://ton.org/docs/#/smart-contracts/tvm_overview?id=transactions-and-phases).
+Каждая транзакция состоит из до 5 этапов. Подробнее [здесь](https://ton-blockchain.github.io/docs/#/smart-contracts/tvm_overview?id=transactions-and-phases).
 
-Нас интересует **Compute phase**. А если быть конкретнее, что "в стеке" при инициализации. Для обычных транзакций, вызванных сообщением, начальное состояние стека выглядит следующим [образом](https://ton.org/docs/#/smart-contracts/tvm_overview?id=initialization-of-tvm):
+Нас интересует **Compute phase**. А если быть конкретнее, что "в стеке" при инициализации. Для обычных транзакций, вызванных сообщением, начальное состояние стека выглядит следующим [образом](https://ton-blockchain.github.io/docs/#/smart-contracts/tvm_overview?id=initialization-of-tvm):
 
 5 элементов:
 - Баланс смарт-контракта (в наноТонах)
@@ -790,7 +790,7 @@ workchain()  - это вспомогательная функция из `params
         return ();
     }
 	
-Теперь пропускаем значения, которые нам не нужны, что за значения можно посмотреть [здесь](https://ton.org/docs/#/smart-contracts/messages).
+Теперь пропускаем значения, которые нам не нужны, что за значения можно посмотреть [здесь](https://ton-blockchain.github.io/docs/#/smart-contracts/messages).
 
     cs~load_msg_addr(); ;; skip dst
     cs~load_coins(); ;; skip value
