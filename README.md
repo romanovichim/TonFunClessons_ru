@@ -27,6 +27,8 @@
 | 16 | Выпускаем свои токены: ICO | Jettons ICO, баланс кошелька Jetton  | [LINK](./16lesson/ICO.md) | ✅  |
 || **Contract Security series**   |||||
 | 17 | Взламываем простой контракт | Уязвимость за счет оптимизации компилятором кода в отсутствие impure  | [LINK](./18lesson/hack.md) | ✅  |
+|| **Requests to the TON blockchain**   |||||
+| 18 | tonapi.io | Requesting information about accounts, domain auctions, NFTs and Jettons  | [LINK](./19lesson/tonapi_eng.md) | ✅  |
 
 ## Lessons in English
 
