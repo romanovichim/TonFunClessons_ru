@@ -28,7 +28,7 @@
 || **Contract Security series**   |||||
 | 17 | Взламываем простой контракт | Уязвимость за счет оптимизации компилятором кода в отсутствие impure  | [LINK](./18lesson/hack.md) | ✅  |
 || **Requests to the TON blockchain**   |||||
-| 18 | tonapi.io | Запрашиваем информацию об аккаунтах, аукционах доменов, NFT и Jetton  | [LINK](./19lesson/tonapi_eng.md) | ✅  |
+| 18 | tonapi.io | Запрашиваем информацию об аккаунтах, аукционах доменов, NFT и Jetton  | [LINK](./19lesson/tonapi.md) | ✅  |
 
 ## Lessons in English
 
