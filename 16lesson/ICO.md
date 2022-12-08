@@ -163,8 +163,8 @@ func main() {
 	}
 	api := ton.NewAPIClient(client)
 
-	w1 := getWallet1(api, "your Seed phrase 1")
-	w2 := getWallet2(api, "your Seed phrase 2")
+	w1 := getWallet(api, "your Seed phrase 1")
+	w2 := getWallet(api, "your Seed phrase 2")
 
 
 	fmt.Println(w1.Address())
