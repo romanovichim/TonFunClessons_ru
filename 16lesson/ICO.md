@@ -18,30 +18,30 @@ ICO — Initial Coin Offering (первичное размещение токе�
 В данном уроке мы будем использовать смарт-контракт из примеров, которые приведены в стандарте Jetton, а именно мастер-контракт `jetton-minter-ICO.fc` [отсюда](https://github.com/ton-blockchain/token-contract/tree/main/ft).
 
 Существенным различием между мастер-контрактом из девятого урока, который мы разбирали подробно, является наличие в данном смарт-контракте ICO механики, за счет следующего кода в `recv_internal()`:
+```c
+if (in_msg_body.slice_empty?()) { ;; buy jettons for Toncoin
 
-	if (in_msg_body.slice_empty?()) { ;; buy jettons for Toncoin
+	  int amount = 10000000; ;; for mint message
+	  int buy_amount = msg_value - amount;
+	  throw_unless(76, buy_amount > 0);
 
-		  int amount = 10000000; ;; for mint message
-		  int buy_amount = msg_value - amount;
-		  throw_unless(76, buy_amount > 0);
+	  int jetton_amount = buy_amount; ;; rate 1 jetton = 1 toncoin; multiply to price here
 
-		  int jetton_amount = buy_amount; ;; rate 1 jetton = 1 toncoin; multiply to price here
+	  var master_msg = begin_cell()
+			.store_uint(op::internal_transfer(), 32)
+			.store_uint(0, 64) ;; quert_id
+			.store_coins(jetton_amount)
+			.store_slice(my_address()) ;; from_address
+			.store_slice(sender_address) ;; response_address
+			.store_coins(0) ;; no forward_amount
+			.store_uint(0, 1) ;; forward_payload in this slice, not separate cell
+			.end_cell();
 
-		  var master_msg = begin_cell()
-				.store_uint(op::internal_transfer(), 32)
-				.store_uint(0, 64) ;; quert_id
-				.store_coins(jetton_amount)
-				.store_slice(my_address()) ;; from_address
-				.store_slice(sender_address) ;; response_address
-				.store_coins(0) ;; no forward_amount
-				.store_uint(0, 1) ;; forward_payload in this slice, not separate cell
-				.end_cell();
-
-		  mint_tokens(sender_address, jetton_wallet_code, amount, master_msg);
-		  save_data(total_supply + jetton_amount, admin_address, content, jetton_wallet_code);
-		  return ();
-		}
-
+	  mint_tokens(sender_address, jetton_wallet_code, amount, master_msg);
+	  save_data(total_supply + jetton_amount, admin_address, content, jetton_wallet_code);
+	  return ();
+	}
+```
 Как вы может видеть, обмен  Toncoin на токены происходит при отправке сообщения с пустым телом. Соответственно, в этом уроке мы сделаем следующее:
 - сделаем два кошелька: с одного запустим мастер-контракт, со второго отправим сообщение с пустым телом для получения токенов
 - задеплоим  `jetton-minter-ICO.fc`
@@ -57,81 +57,78 @@ ICO — Initial Coin Offering (первичное размещение токе�
 Первое, что надо сделать, это создать два кошелька в TON w1 и w2, один из них будет "адресом администратора" смарт-контракта, второй мы будем использовать для обмена тестовых TON на Jetton в тестовой сети.(урок, где разбирается как это сделать [здесь](https://github.com/romanovichim/TonFunClessons_ru/blob/main/14lesson/wallet.md))
 
 Код `SeedPhrase.go`: 
+```go
+package main
 
-	package main
+import (
+	"context"
+	"log"
+	"fmt"
 
-	import (
-		"context"
-		"log"
-		"fmt"
+	"github.com/xssnick/tonutils-go/liteclient"
+	"github.com/xssnick/tonutils-go/ton"
+	"github.com/xssnick/tonutils-go/ton/wallet"
+)
 
-		"github.com/xssnick/tonutils-go/liteclient"
-		"github.com/xssnick/tonutils-go/ton"
-		"github.com/xssnick/tonutils-go/ton/wallet"
-	)
+func main() {
+	client := liteclient.NewConnectionPool()
 
-	func main() {
-
-
-		client := liteclient.NewConnectionPool()
-
-		configUrl := "https://ton-blockchain.github.io/testnet-global.config.json"
+	configUrl := "https://ton-blockchain.github.io/testnet-global.config.json"
 
 
-		err := client.AddConnectionsFromConfigUrl(context.Background(), configUrl)
-		if err != nil {
-			panic(err)
-		}
-		api := ton.NewAPIClient(client)
+	err := client.AddConnectionsFromConfigUrl(context.Background(), configUrl)
+	if err != nil {
+		panic(err)
+	}
+	api := ton.NewAPIClient(client)
 
-		seed1 := wallet.NewSeed()
-		fmt.Println("Seed phrase one:")
-		fmt.Println(seed1)
+	seed1 := wallet.NewSeed()
+	fmt.Println("Seed phrase one:")
+	fmt.Println(seed1)
 
-		w1, err := wallet.FromSeed(api, seed1, wallet.V3)
-		if err != nil {
-			log.Fatalln("FromSeed err:", err.Error())
-			return
-		}
-		fmt.Println("Address one:")
-		fmt.Println(w1.Address())
+	w1, err := wallet.FromSeed(api, seed1, wallet.V3)
+	if err != nil {
+		log.Fatalln("FromSeed err:", err.Error())
+		return
+	}
+	fmt.Println("Address one:")
+	fmt.Println(w1.Address())
 
-		seed2 := wallet.NewSeed()
-		fmt.Println("Seed phrase two:")
-		fmt.Println(seed2)
+	seed2 := wallet.NewSeed()
+	fmt.Println("Seed phrase two:")
+	fmt.Println(seed2)
 
-		w2, err := wallet.FromSeed(api, seed2, wallet.V3)
-		if err != nil {
-			log.Fatalln("FromSeed err:", err.Error())
-			return
-		}
-		fmt.Println("Address two:")
-		fmt.Println(w2.Address())
+	w2, err := wallet.FromSeed(api, seed2, wallet.V3)
+	if err != nil {
+		log.Fatalln("FromSeed err:", err.Error())
+		return
+	}
+	fmt.Println("Address two:")
+	fmt.Println(w2.Address())
 
-		block, err := api.CurrentMasterchainInfo(context.Background())
-		if err != nil {
-			log.Fatalln("CurrentMasterchainInfo err:", err.Error())
-			return
-		}
-
-		balance1, err := w1.GetBalance(context.Background(), block)
-		if err != nil {
-			log.Fatalln("GetBalance err:", err.Error())
-			return
-		}
-		fmt.Println("Balance one:")
-		fmt.Println(balance1)
-
-		balance2, err := w2.GetBalance(context.Background(), block)
-		if err != nil {
-			log.Fatalln("GetBalance err:", err.Error())
-			return
-		}
-		fmt.Println("Balance two:")
-		fmt.Println(balance2)
-
+	block, err := api.CurrentMasterchainInfo(context.Background())
+	if err != nil {
+		log.Fatalln("CurrentMasterchainInfo err:", err.Error())
+		return
 	}
 
+	balance1, err := w1.GetBalance(context.Background(), block)
+	if err != nil {
+		log.Fatalln("GetBalance err:", err.Error())
+		return
+	}
+	fmt.Println("Balance one:")
+	fmt.Println(balance1)
+
+	balance2, err := w2.GetBalance(context.Background(), block)
+	if err != nil {
+		log.Fatalln("GetBalance err:", err.Error())
+		return
+	}
+	fmt.Println("Balance two:")
+	fmt.Println(balance2)
+}
+```
 Сохраняем куда-нибудь себе сид фразы, с помощью них мы будем пользоваться кошельком в других скриптах, а также отправляем тестовые тонкойны на оба адреса с помощью бота: https://t.me/testgiver_ton_bot
 
 Минутой позже, проверим, что средства поступили с помощью:  https://testnet.tonscan.org/
@@ -141,84 +138,70 @@ ICO — Initial Coin Offering (первичное размещение токе�
 Пользоваться кошельками мы будем с помощью написанных нами функций, как и в прошлых уроках. Воспользуемся ими чтобы, например, узнать баланс.
 
 Код `WalletFunC.go`: 
+```go
+package main
 
-	package main
+import (
+	"context"
+	"log"
+	"fmt"
+	"strings"
 
-	import (
-		"context"
-		"log"
-		"fmt"
-		"strings"
+	"github.com/xssnick/tonutils-go/liteclient"
+	"github.com/xssnick/tonutils-go/ton"
+	"github.com/xssnick/tonutils-go/ton/wallet"
+)
 
-		"github.com/xssnick/tonutils-go/liteclient"
-		"github.com/xssnick/tonutils-go/ton"
-		"github.com/xssnick/tonutils-go/ton/wallet"
-	)
+func main() {
+	client := liteclient.NewConnectionPool()
 
-	func main() {
+	configUrl := "https://ton-blockchain.github.io/testnet-global.config.json"
 
+	err := client.AddConnectionsFromConfigUrl(context.Background(), configUrl)
+	if err != nil {
+		panic(err)
+	}
+	api := ton.NewAPIClient(client)
 
-		client := liteclient.NewConnectionPool()
-
-		configUrl := "https://ton-blockchain.github.io/testnet-global.config.json"
-
-		err := client.AddConnectionsFromConfigUrl(context.Background(), configUrl)
-		if err != nil {
-			panic(err)
-		}
-		api := ton.NewAPIClient(client)
-
-		w1 := getWallet1(api)
-		w2 := getWallet2(api)
+	w1 := getWallet1(api, "your Seed phrase 1")
+	w2 := getWallet2(api, "your Seed phrase 2")
 
 
-		fmt.Println(w1.Address())
-		fmt.Println(w1.Address())
-		block, err := api.CurrentMasterchainInfo(context.Background())
-		if err != nil {
-			log.Fatalln("CurrentMasterchainInfo err:", err.Error())
-			return
-		}
+	fmt.Println(w1.Address())
+	fmt.Println(w2.Address())
+	block, err := api.CurrentMasterchainInfo(context.Background())
+	if err != nil {
+		log.Fatalln("CurrentMasterchainInfo err:", err.Error())
+		return
+	}
+	
 
-
-		balance1, err := w1.GetBalance(context.Background(), block)
-		if err != nil {
-			log.Fatalln("GetBalance1 err:", err.Error())
-			return
-		}
-
-		fmt.Println(balance1)
-
-		balance2, err := w2.GetBalance(context.Background(), block)
-		if err != nil {
-			log.Fatalln("GetBalance2 err:", err.Error())
-			return
-		}
-
-		fmt.Println(balance2)
-
+	balance1, err := w1.GetBalance(context.Background(), block)
+	if err != nil {
+		log.Fatalln("GetBalance1 err:", err.Error())
+		return
 	}
 
+	fmt.Println(balance1)
 
-
-	func getWallet1(api *ton.APIClient) *wallet.Wallet {
-		words := strings.Split("your Seed phrase 1", " ")
-		w, err := wallet.FromSeed(api, words, wallet.V3)
-		if err != nil {
-			panic(err)
-		}
-		return w
+	balance2, err := w2.GetBalance(context.Background(), block)
+	if err != nil {
+		log.Fatalln("GetBalance2 err:", err.Error())
+		return
 	}
 
-	func getWallet2(api *ton.APIClient) *wallet.Wallet {
-		words := strings.Split("your Seed phrase 2", " ")
-		w, err := wallet.FromSeed(api, words, wallet.V3)
-		if err != nil {
-			panic(err)
-		}
-		return w
-	}
+	fmt.Println(balance2)
+}
 
+func getWallet(api *ton.APIClient, seed string) *wallet.Wallet {
+	words := strings.Split(seed, " ")
+	w, err := wallet.FromSeed(api, words, wallet.V3)
+	if err != nil {
+		panic(err)
+	}
+	return w
+}
+```
 > Да, можно сделать одну функцию и прокидывать туда параметры, но сделано так для простоты восприятия кода
 
 ### Деплоим контракты
@@ -276,89 +259,88 @@ ICO — Initial Coin Offering (первичное размещение токе�
 	
 
 Для удобства посмотрим на функцию сохраняющую данные в регистр `с4`:
-
-	 () save_data(int total_supply, slice admin_address, cell content, cell jetton_wallet_code) impure inline {
-	  set_data(begin_cell()
-				.store_coins(total_supply)
-				.store_slice(admin_address)
-				.store_ref(content)
-				.store_ref(jetton_wallet_code)
-			   .end_cell()
-			  );
-	}
-
+```c
+ () save_data(int total_supply, slice admin_address, cell content, cell jetton_wallet_code) impure inline {
+  set_data(begin_cell()
+			.store_coins(total_supply)
+			.store_slice(admin_address)
+			.store_ref(content)
+			.store_ref(jetton_wallet_code)
+		   .end_cell()
+		  );
+}
+```
 Content по стандарту можно посмотреть [здесь](https://github.com/ton-blockchain/TIPs/issues/64). Так как это тестовый пример собирать все данные не будем, положим только ссылку и то на уроки))
- 
-	 func getContractData(OwnerAddr *address.Address) *cell.Cell {
-		// storage scheme
-		// storage#_ total_supply:Coins admin_address:MsgAddress content:^Cell jetton_wallet_code:^Cell = Storage;
+ ```go
+ func getContractData(OwnerAddr *address.Address) *cell.Cell {
+	// storage scheme
+	// storage#_ total_supply:Coins admin_address:MsgAddress content:^Cell jetton_wallet_code:^Cell = Storage;
 
-		uri := "https://github.com/romanovichim/TonFunClessons_ru"
-		jettonContentCell := cell.BeginCell().MustStoreStringSnake(uri).EndCell()
+	uri := "https://github.com/romanovichim/TonFunClessons_ru"
+	jettonContentCell := cell.BeginCell().MustStoreStringSnake(uri).EndCell()
 
-		contentRef := cell.BeginCell().
-			MustStoreRef(jettonContentCell).
-			EndCell()
+	contentRef := cell.BeginCell().
+		MustStoreRef(jettonContentCell).
+		EndCell()
 
-		return data
-	}
- 
+	return data
+}
+ ```
 После подготовки ссылки соберем ячейку данных, положив туда:
  - общее предложение токенов MustStoreUInt(10000000, 64)
  - адрес кошелька админа MustStoreAddr(OwnerAddr)
  - ячейка с контентом jettonContentCell
  - код кошелька контракта MustStoreRef(getJettonWalletCode())
- 
-	func getContractData(OwnerAddr *address.Address) *cell.Cell {
-		// storage scheme
-		// storage#_ total_supply:Coins admin_address:MsgAddress content:^Cell jetton_wallet_code:^Cell = Storage;
+ ```go
+func getContractData(OwnerAddr *address.Address) *cell.Cell {
+	// storage scheme
+	// storage#_ total_supply:Coins admin_address:MsgAddress content:^Cell jetton_wallet_code:^Cell = Storage;
 
-		uri := "https://github.com/romanovichim/TonFunClessons_ru"
-		jettonContentCell := cell.BeginCell().MustStoreStringSnake(uri).EndCell()
+	uri := "https://github.com/romanovichim/TonFunClessons_ru"
+	jettonContentCell := cell.BeginCell().MustStoreStringSnake(uri).EndCell()
 
-		contentRef := cell.BeginCell().
-			MustStoreRef(jettonContentCell).
-			EndCell()
+	contentRef := cell.BeginCell().
+		MustStoreRef(jettonContentCell).
+		EndCell()
 
-		data := cell.BeginCell().MustStoreUInt(10000000, 64).
-			MustStoreAddr(OwnerAddr).
-			MustStoreRef(contentRef).
-			MustStoreRef(getJettonWalletCode()).
-			EndCell()
+	data := cell.BeginCell().MustStoreUInt(10000000, 64).
+		MustStoreAddr(OwnerAddr).
+		MustStoreRef(contentRef).
+		MustStoreRef(getJettonWalletCode()).
+		EndCell()
 
-		return data
-	}
-
+	return data
+}
+```
 #### Осуществляем деплой 
 
  В целом скрипт деплоя идентичен скрипту из урока, где мы деплоили NFT коллекцию. У нас есть функция `getContractData` с данными, две функции с hexboc мастер контракта и кошелька и main откуда мы деплоим ICO контракт:
- 
-	 func main() {
+ ```go
+ func main() {
+	// connect to mainnet lite server
+	client := liteclient.NewConnectionPool()
 
-		// connect to mainnet lite server
-		client := liteclient.NewConnectionPool()
+	configUrl := "https://ton-blockchain.github.io/testnet-global.config.json"
 
-		configUrl := "https://ton-blockchain.github.io/testnet-global.config.json"
-
-		err := client.AddConnectionsFromConfigUrl(context.Background(), configUrl)
-		if err != nil {
-			panic(err)
-		}
-		api := ton.NewAPIClient(client)
-		w := getWallet(api)
-
-		msgBody := cell.BeginCell().EndCell()
-
-		fmt.Println("Deploying Jetton ICO	contract to mainnet...")
-		addr, err := w.DeployContract(context.Background(), tlb.MustFromTON("0.02"),
-			msgBody, getJettonMasterCode(), getContractData(w.Address()), true)
-		if err != nil {
-			panic(err)
-		}
-
-		fmt.Println("Deployed contract addr:", addr.String())
+	err := client.AddConnectionsFromConfigUrl(context.Background(), configUrl)
+	if err != nil {
+		panic(err)
 	}
- 
+	api := ton.NewAPIClient(client)
+	w := getWallet(api)
+
+	msgBody := cell.BeginCell().EndCell()
+
+	fmt.Println("Deploying Jetton ICO	contract to mainnet...")
+	addr, err := w.DeployContract(context.Background(), tlb.MustFromTON("0.02"),
+		msgBody, getJettonMasterCode(), getContractData(w.Address()), true)
+	if err != nil {
+		panic(err)
+	}
+
+	fmt.Println("Deployed contract addr:", addr.String())
+}
+ ```
 Пример скрипта в файле `DeployJettonMinter.go`. 
  
 ### Вызываем смарт-контракты
@@ -366,83 +348,84 @@ Content по стандарту можно посмотреть [здесь](htt
 После деплоя смарт-контракта, остается вызвать его и обменять Toncoin, на наш токен. Для этого надо отправить сообщение с пустым телом и каким-то кол-вом Toncoin. Воспользуемся вторым кошельком, который мы заготовили в начале урока.
 
 Код `ICO.go`:
+```go
+func main() {
+	client := liteclient.NewConnectionPool()
+	// connect to testnet lite server
+	err := client.AddConnectionsFromConfigUrl(context.Background(), "https://ton-blockchain.github.io/testnet-global.config.json")
+	if err != nil {
+		panic(err)
+	}
 
-	func main() {
-		client := liteclient.NewConnectionPool()
-		// connect to testnet lite server
-		err := client.AddConnectionsFromConfigUrl(context.Background(), "https://ton-blockchain.github.io/testnet-global.config.json")
+	// bound all requests to single TON node
+	ctx := client.StickyContext(context.Background())
+	
+	// initialize ton api lite connection wrapper
+	api := ton.NewAPIClient(client)
+
+	// seed words of account, you can generate them with any wallet or using wallet.NewSeed() method
+	words := strings.Split("your seed phrase", " ")
+
+	w, err := wallet.FromSeed(api, words, wallet.V3)
+	if err != nil {
+		log.Fatalln("FromSeed err:", err.Error())
+		return
+	}
+
+	log.Println("wallet address:", w.Address())
+
+	block, err := api.CurrentMasterchainInfo(ctx)
+	if err != nil {
+		log.Fatalln("CurrentMasterchainInfo err:", err.Error())
+		return
+	}
+
+	balance, err := w.GetBalance(ctx, block)
+	if err != nil {
+		log.Fatalln("GetBalance err:", err.Error())
+		return
+	}
+
+	if balance.NanoTON().Uint64() >= 100000000 {
+		// ICO address 
+		addr := address.MustParseAddr("EQD_yyEbNQeWbWfnOIowqNilB8wwbCg6nLxHDP3Rbey1eA72")
+
+		fmt.Println("Let's send message")
+		err = w.Send(ctx, &wallet.Message{
+			Mode: 3,
+			InternalMessage: &tlb.InternalMessage{
+				IHRDisabled: true,
+				Bounce:      true,
+				DstAddr:     addr,
+				Amount:      tlb.MustFromTON("1"),
+				Body:        cell.BeginCell().EndCell(),
+			},
+		}, true)
 		if err != nil {
-			panic(err)
+			fmt.Println(err)
 		}
 
-		// initialize ton api lite connection wrapper
-		api := ton.NewAPIClient(client)
-
-		// seed words of account, you can generate them with any wallet or using wallet.NewSeed() method
-		words := strings.Split("your seed phrase", " ")
-
-		w, err := wallet.FromSeed(api, words, wallet.V3)
-		if err != nil {
-			log.Fatalln("FromSeed err:", err.Error())
-			return
-		}
-
-		log.Println("wallet address:", w.Address())
-
-		block, err := api.CurrentMasterchainInfo(context.Background())
+		// update chain info
+		block, err = api.CurrentMasterchainInfo(ctx)
 		if err != nil {
 			log.Fatalln("CurrentMasterchainInfo err:", err.Error())
 			return
 		}
 
-		balance, err := w.GetBalance(context.Background(), block)
+		balance, err = w.GetBalance(ctx, block)
 		if err != nil {
 			log.Fatalln("GetBalance err:", err.Error())
 			return
 		}
 
-		if balance.NanoTON().Uint64() >= 100000000 {
+		log.Println("transaction sent, balance left:", balance.TON())
 
-			// ICO address 
-			addr := address.MustParseAddr("EQD_yyEbNQeWbWfnOIowqNilB8wwbCg6nLxHDP3Rbey1eA72")
-
-		fmt.Println("Let's send message")
-		err = w.Send(context.Background(), &wallet.Message{
-		 Mode: 3,
-		 InternalMessage: &tlb.InternalMessage{
-		  IHRDisabled: true,
-		  Bounce:      true,
-		  DstAddr:     addr,
-		  Amount:      tlb.MustFromTON("1"),
-		  Body:        cell.BeginCell().EndCell(),
-		 },
-		}, true)
-		if err != nil {
-		 fmt.Println(err)
-		}
-
-			// update chain info
-			block, err = api.CurrentMasterchainInfo(context.Background())
-			if err != nil {
-				log.Fatalln("CurrentMasterchainInfo err:", err.Error())
-				return
-			}
-
-			balance, err = w.GetBalance(context.Background(), block)
-			if err != nil {
-				log.Fatalln("GetBalance err:", err.Error())
-				return
-			}
-
-			log.Println("transaction sent, balance left:", balance.TON())
-
-			return
-		}
-
-		log.Println("not enough balance:", balance.TON())
+		return
 	}
-	
 
+	log.Println("not enough balance:", balance.TON())
+}
+```
 В случае успеха в https://testnet.tonscan.org/ можем увидеть следущую картину: 
 
 ![tnscn](./img/tnscn.PNG)
@@ -454,54 +437,50 @@ Content по стандарту можно посмотреть [здесь](htt
  Возьмем баланс токенов с нашего кошелька с которого мы отправляли Toncoin.
  
  Код `JettonBalance.go`:
+```go
+package main
 
-	package main
+import (
+	"context"
+	"github.com/xssnick/tonutils-go/address"
+	"github.com/xssnick/tonutils-go/ton/jetton"
+	"log"
 
-	import (
-		"context"
-		"github.com/xssnick/tonutils-go/address"
-		_ "github.com/xssnick/tonutils-go/tlb"
-		"github.com/xssnick/tonutils-go/ton/jetton"
-		_ "github.com/xssnick/tonutils-go/ton/nft"
-		_ "github.com/xssnick/tonutils-go/ton/wallet"
-		"log"
-		_ "strings"
+	"github.com/xssnick/tonutils-go/liteclient"
+	"github.com/xssnick/tonutils-go/ton"
+)
 
-		"github.com/xssnick/tonutils-go/liteclient"
-		"github.com/xssnick/tonutils-go/ton"
-	)
+func main() {
+	client := liteclient.NewConnectionPool()
 
-	func main() {
-		client := liteclient.NewConnectionPool()
-
-		// connect to testnet lite server
-		err := client.AddConnectionsFromConfigUrl(context.Background(), "https://ton-blockchain.github.io/testnet-global.config.json")
-		if err != nil {
-			panic(err)
-		}
-
-		// initialize ton api lite connection wrapper
-		api := ton.NewAPIClient(client)
-
-		// jetton contract address
-		contract := address.MustParseAddr("EQD_yyEbNQeWbWfnOIowqNilB8wwbCg6nLxHDP3Rbey1eA72")
-		master := jetton.NewJettonMasterClient(api, contract)
-
-		// get jetton wallet for account
-		ownerAddr := address.MustParseAddr("EQAIz6DspthuIkUaBZaeH7THhe7LSOXmQImH2eT97KI2Dl4z")
-		tokenWallet, err := master.GetJettonWallet(context.Background(), ownerAddr)
-		if err != nil {
-			log.Fatal(err)
-		}
-
-		tokenBalance, err := tokenWallet.GetBalance(context.Background())
-		if err != nil {
-			log.Fatal(err)
-		}
-
-		log.Println("token balance:", tokenBalance.String())
+	// connect to testnet lite server
+	err := client.AddConnectionsFromConfigUrl(context.Background(), "https://ton-blockchain.github.io/testnet-global.config.json")
+	if err != nil {
+		panic(err)
 	}
 
+	// initialize ton api lite connection wrapper
+	api := ton.NewAPIClient(client)
+
+	// jetton contract address
+	contract := address.MustParseAddr("EQD_yyEbNQeWbWfnOIowqNilB8wwbCg6nLxHDP3Rbey1eA72")
+	master := jetton.NewJettonMasterClient(api, contract)
+
+	// get jetton wallet for account
+	ownerAddr := address.MustParseAddr("EQAIz6DspthuIkUaBZaeH7THhe7LSOXmQImH2eT97KI2Dl4z")
+	tokenWallet, err := master.GetJettonWallet(context.Background(), ownerAddr)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	tokenBalance, err := tokenWallet.GetBalance(context.Background())
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	log.Println("token balance:", tokenBalance.String())
+}
+```
 В случае успеха можем увидеть следущую картину: 
 
 ![cli](./img/wg.PNG)
@@ -510,7 +489,7 @@ Content по стандарту можно посмотреть [здесь](htt
 
 ##  Задание
 
-В библиотеке tonutils-go, есть отельные удобные методы для передачи токенов с кошелька на кошелек, попробуйте воспользоваться ими для передачи токенов с кошелька `w2` на `w1`.
+В библиотеке [tonutils-go](https://github.com/xssnick/tonutils-go), есть отельные удобные методы для передачи токенов с кошелька на кошелек, попробуйте воспользоваться ими для передачи токенов с кошелька `w2` на `w1`.
 
 ## Заключениe
 
