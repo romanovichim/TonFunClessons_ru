@@ -4,7 +4,7 @@ cell load_data() {
 	if (ds.slice_bits() == 0) {
 		return new_dict();
 	} else {
-		return data;
+		return ds~load_dict();
 	}
 }
 
@@ -16,7 +16,7 @@ cell load_data() {
 
 	cell data = get_data();
 	slice ds = data.begin_parse();
-	cell dic = ds.slice_bits() == 0 ? new_dict() : data;
+	cell dic = ds.slice_bits() == 0 ? new_dict() : ds~load_dict();
 
 
 	if (op == 1) {
