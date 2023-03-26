@@ -1,0 +1,18 @@
+.app {
+  padding: 20px 40px;
+  display: flex;
+  flex-direction: column;
+
+  > header {
+    display: flex;
+    justify-content: space-between;
+
+    margin-bottom: 10px;
+  }
+  > main {
+    display: flex;
+    flex-direction: column;
+    align-self: center;
+  }
+
+}

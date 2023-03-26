@@ -30,6 +30,8 @@
 || **Requests to the TON blockchain**   |||||
 | 18 | tonapi.io | Запрашиваем информацию об аккаунтах, аукционах доменов, NFT и Jetton  | [LINK](./19lesson/tonapi.md) | ✅  |
 | 19 | ton.js | Получаем данные из смарт-контракта с помощью JS(ton.js)  | [LINK](./20lesson/tonjs.md) | ✅  |
+|| **Dapp series**   |||||
+| 20 | Auth with tonkeeper | Собираем приложение с авторизацей через Тонконнект   | [LINK](./21lesson/tonkeeper.md) | ✅  |
 
 ## Lessons in English
 
