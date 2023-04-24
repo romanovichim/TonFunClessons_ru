@@ -289,7 +289,7 @@
 Код:
 
 	_ only_manager_can_change(int exit_code, cell data, tuple stack, cell actions, int gas) method_id(3) {
-		throw_if(100, exit_code == 0); 
+		throw_if(100, exit_code != 1001); 
 
 		cell manager_address = begin_cell().store_uint(1, 2).store_uint(5, 9).store_uint(1, 5).end_cell();
 		cell stored_address = begin_cell().store_uint(1, 2).store_uint(5, 9).store_uint(3, 5).end_cell();
@@ -302,9 +302,9 @@
 
 ## Разбираем
 
-Опять же проверяем код возврата, функция создаст исключение, если код возврата не равен нулю.
+Опять же проверяем код возврата, функция создаст исключение, если код возврата равен `1001` (ожидаемый код ошибки из проверки `throw_if(1001, ~ equal_slices(manager_address, sender_address));`).
 
-`throw_if(100, exit_code != 0);`
+`throw_if(100, exit_code != 1001);`
 
 0 - стандартный код возврата из успешного выполнения смарт-контракта.
 
