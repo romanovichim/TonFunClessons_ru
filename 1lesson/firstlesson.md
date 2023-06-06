@@ -1,13 +1,13 @@
 # Урок 1 Простой смарт-контракт
 ## Введение
 
-В этом уроке мы напишем ваш первый смартконтракт в тестовой сети The Open Network на языке FUNC, задеплоим* его в тестовую сеть с помощью [toncli](https://github.com/disintar/toncli), а также протестируем его с помощью сообщения на языке Fift.
+В этом уроке мы напишем ваш первый смартконтракт в тестовой сети The Open Network на языке FUNC, задеплоим* его в тестовую сеть с помощью [Blueprint](https://github.com/ton-community/blueprint), а также протестируем его с помощью сообщения с помощью Javascript-библиотеки [ton](https://github.com/ton-core/ton).
 
   > *Деплой  - процесс переноса в сеть (в данном случае смарт-контракта в блокчейн)
   
 ## Требования
 
-Для прохождения данного урока вам необходимо установить интерфейс для командной строки [toncli](https://github.com/disintar/toncli/blob/master/INSTALLATION.md)
+Для прохождения данного урока вам достаточно установить [Node.js](https://nodejs.org).
 
 ## Смарт-контракт
 
@@ -17,22 +17,36 @@
 - В смарт-контракте должен быть предусмотрен метод *get total* позволяющий вернуть значение *total* 
 - Если тело входящего сообщения меньше 32 бит, то контракт должен выдать исключение
 
-## Создадим проект с помощью toncli
+## Создадим проект с помощью Blueprint
 
-В консоли выполните следующие команды:
+В консоли выполните следующую команду:
 
-    toncli start wallet
-    cd wallet
+```bash
+npm create ton@latest
+```
 
-Toncli создал простой проект кошелька, в нем вы можете увидеть 4 папки:
-- build;
-- func;
-- fift;
-- test;
+Далее следуйте инструкциям. Нужно будет ввести название проекта, название смарт-контракта и по желанию заготовку для простого контракта. Для нашего урока, назовём проект `my-counter`, смарт-контракт `Сounter` и выберем начало с пустого контракта на языке **FunC**, о котором мы поговорим чуть позже.
 
-На данном этапе нас интересуют папки func и fift, в которых мы будем писать код на FunС и Fift соответственно.
+```bash
+? Project name my-counter
+? First created contract name (PascalCase) Counter
+? Choose the project template An empty contract (FunC)
+```
 
-##### Что такое FunC и Fift
+Blueprint создал простой проект. Перейдём в его директорию:
+```bash
+cd my-counter
+```
+
+Там вы можете увидеть 4 папки:
+- contracts;
+- wrappers;
+- scripts;
+- tests;
+
+На данном этапе нас интересуют папки contracts и wrappers, в которых мы будем писать код на FunС и обёртку для него на Typescript соответственно.
+
+##### Что такое FunC?
 
 Высокоуровневый язык FunC используется для программирования смарт-контрактов на TON. Программы FunC компилируются в Fift ассемблерный код, который генерирует соответствующий байт-код для виртуальной машины TON (TVM) (Подробнее про TVM [здесь](https://ton-blockchain.github.io/docs/tvm.pdf)). Далее этот байт-код (на самом деле дерево ячеек, как и любые другие данные в TON Blockchain) может быть использован для создания смарт-контракта в блокчейне или может быть запущен на локальном экземпляре TVM (TON Virtual Machine).
 
@@ -40,11 +54,11 @@ Toncli создал простой проект кошелька, в нем вы
 
 ##### Подготовим файл для нашего кода
 
-Зайдите в папку func:
+Зайдите в папку contracts:
 
-    cd func
+    cd contracts
 
-И откройте файл code.func, на своем экране вы увидите смарт-контракт кошелька, удалите весь код и мы готовы начать писать наш первый смарт контракт.
+И откройте файл counter.func, на своем экране вы увидите смарт-контракт с всего одной пустой функцией. Теперь мы готовы начать писать наш первый смарт контракт.
 
 ## Внешние методы
 
@@ -57,15 +71,17 @@ Toncli создал простой проект кошелька, в нем вы
  
 Под наши условия подходит `recv_internal()`
 
-В файле `code.fc` пропишем:
+В файле `counter.fc` уже есть объявленная функция без кода:
 
-    () recv_internal(slice in_msg_body) impure {
+```func
+() recv_internal(int my_balance, int msg_value, cell in_msg_full, slice in_msg_body) impure {
     ;; здесь будет код
-    }
+}
+```
  
  >  ;;  две точки с запятой синтаксис однострочного комментария
  
-Мы передаем в функцию слайс in_msg_body и используем ключевое слово impure
+Функция принимает числа с балансом контракта, суммой входящего сообщения, ячейкой с исходным сообщением и слайс in_msg_body, в котором хранится только тело принимаемого сообщения. Также мы используем ключевое слово impure
 
 `impure` — ключевое слово, которое указывает на то, что функция изменяет данные смарт-контракта.
 
@@ -97,8 +113,8 @@ Toncli создал простой проект кошелька, в нем вы
 
 Функция `recv_internal()` теперь выглядит так:
 
-    () recv_internal(slice in_msg_body) impure {
-    int n = in_msg_body~load_uint(32);
+    () recv_internal(int my_balance, int msg_value, cell in_msg_full, slice in_msg_body) impure {
+        int n = in_msg_body~load_uint(32);
     }
 
 `load_uint` функция из [стандартной библиотеки FunC ](https://ton-blockchain.github.io/docs/#/func/stdlib) она загружает целое число n-бит без знака из слайса.
@@ -133,7 +149,7 @@ Toncli создал простой проект кошелька, в нем вы
 
 Теперь наша функция будет выглядеть так:
 
-    () recv_internal(slice in_msg_body) impure {
+    () recv_internal(int my_balance, int msg_value, cell in_msg_full, slice in_msg_body) impure {
 		int n = in_msg_body~load_uint(32);
 
 		slice ds = get_data().begin_parse();
@@ -144,7 +160,7 @@ Toncli создал простой проект кошелька, в нем вы
 
 Для суммирования будем использовать бинарную операцию суммирования `+`  и присвоение `=` 
 
-    () recv_internal(slice in_msg_body) impure {
+    () recv_internal(int my_balance, int msg_value, cell in_msg_full, slice in_msg_body) impure {
 		int n = in_msg_body~load_uint(32);
 
 		slice ds = get_data().begin_parse();
@@ -173,7 +189,7 @@ Toncli создал простой проект кошелька, в нем вы
 
 Итог:
 
-    () recv_internal(slice in_msg_body) impure {
+    () recv_internal(int my_balance, int msg_value, cell in_msg_full, slice in_msg_body) impure {
 		int n = in_msg_body~load_uint(32);
 
 		slice ds = get_data().begin_parse();
@@ -200,7 +216,7 @@ Toncli создал простой проект кошелька, в нем вы
 
 Вставим в начало функции:
 
-    () recv_internal(slice in_msg_body) impure {
+    () recv_internal(int my_balance, int msg_value, cell in_msg_full, slice in_msg_body) impure {
 		throw_if(35,in_msg_body.slice_bits() < 32);
 
 		int n = in_msg_body~load_uint(32);
@@ -247,7 +263,7 @@ Toncli создал простой проект кошелька, в нем вы
 ## Весь код нашего смарт-контракта
 
 
-    () recv_internal(slice in_msg_body) impure {
+    () recv_internal(int my_balance, int msg_value, cell in_msg_full, slice in_msg_body) impure {
 		throw_if(35,in_msg_body.slice_bits() < 32);
 
 		int n = in_msg_body~load_uint(32);
@@ -268,12 +284,157 @@ Toncli создал простой проект кошелька, в нем вы
 	}
 	
 	
-	
+## Пишем обёртку для контракта на Typescript
+
+Мы хотим иметь возможность взаимодействовать с нашим смарт-контрактом. Для этого напишем так называемую обёртку на языке Typescript (типизированный Javascript).
+
+Перейдите в директорию wrappers проекта и откройте файл Counter.ts. Большая часть обёртки уже присутствует по умолчанию. Сейчас нам нужно лишь дополнить ту часть, где задаются данные контракта для деплоя и добавить две функции для взаимодействия: отправка чисел контратку и вызов гет-метода get_total().
+
+### Устанавливаем данные для деплоя
+
+Эти строчки отвечают за то, что мы хотим устанавливать в данные контракта (ячейка c4):
+
+```ts
+export type CounterConfig = {};
+
+export function counterConfigToCell(config: CounterConfig): Cell {
+    return beginCell().endCell();
+}
+```
+
+`CounterConfig` это объект, в который при необходимости мы можем добавить значения, которыми будет инициализироваться контракт.
+`counterConfigToCell` это функция, которая преобразовывает тот самый объект в ячейку, которая готова к записи в данные контракта для деплоя.
+
+В нашем случае в данных контракта должно лежать всего одно число длины 64 бита. CounterConfig нам не понадобится, а вот функцию обновить нужно.
+
+Функция возвращает только одну ячейку, в которую мы записываем данные для деплоя контракта. Добавим туда запись числа 0 длиной 64 бита:
+
+```ts
+return beginCell().storeUint(0, 64).endCell();
+```
+
+Теперь при создании контракта, в его данных сразу будет лежать число 0.
+
+### Метод для отправки сообщений с числами
+
+Ниже в том же файле инициализируется класс Counter, в котором мы можем изменять старые и добавлять новые методы для взаимодействия с контрактом. По умолчанию там уже есть методы для инициализации контракта либо из конфига, либо из адреса уже задеплоенного контракта, а также готовый метод для деплоя.
+
+Давайте добавим метод, с помощью которого мы сможем отправить контракту сообщение для увеличения числа total.
+
+> Все методы, которые отправляют сообщения, должны иметь префикс `send` в начале.
+> Все методы, которые вызывают гет-методы, должны иметь префикс `get` в начале.
+
+Для удобства можем скопировать метод sendDeploy, переименовать его в sendNumber и потом уже изменить только то, что нам нужно будет.
+
+```ts
+async sendNumber(provider: ContractProvider, via: Sender, value: bigint) {
+    await provider.internal(via, {
+        value,
+        sendMode: SendMode.PAY_GAS_SEPARATELY,
+        body: beginCell().endCell(),
+    });
+}
+```
+
+Этот метод принимает объекты provider и via, которые определяют, куда и от кого нужно отправить сообщение соответственно. Также передаётся число value, которое означает, сколько Toncoin мы хотим прикрепить к отправляемому сообщению.
+
+В теле метода вызывается функция provider.internal(), которая отправляет сообщение на наш контракт. Она принимает объект via, который мы получили ранее, а также параметры отправляемого сообщения. Эти параметры нам и нужно сейчас изменить.
+
+Как мы помним, наш смарт-контракт ожидает от получаемого сообщения лишь одно число длиной 32 бита. Давайте добавим аргумент для нашего метода и изменим параметр body:
+
+```ts
+async sendNumber(provider: ContractProvider, via: Sender, value: bigint, number: bigint) {
+    await provider.internal(via, {
+        value,
+        sendMode: SendMode.PAY_GAS_SEPARATELY,
+        body: beginCell().storeUint(number, 32).endCell(),
+    });
+}
+```
+
+Лучше всегда использовать тип bigint для чисел в обёртках смарт-контрактов, так как он поддерживает очень большие числа и является более точным, чем number.
+
+### Метод для вызова get_total
+
+Добавим метод, который будет вызывать get_total у нашего контракта:
+
+```ts
+async getTotal(provider: ContractProvider) {
+    // тут будет код
+}
+```
+
+Он уже не должен принимать параметры via и value, так как никаких сообщений контракту не посылается при вызове гет-методов.
+
+Добавим вызов get_total. Для этого используем функцию `provider.get`, которая принимает два аргумента: название гет-метода и аргументы, которые в него следует передать. В нашем случае название это "get_total", а список аргументов пустой.
+
+```ts
+const result = (await provider.get('get_total', [])).stack;
+```
+
+Теперь вернём из нашей функции полученное в результате число:
+
+```ts
+return result.readBigNumber();
+```
+
+### Весь код обёртки
+
+```ts
+import { Address, beginCell, Cell, Contract, contractAddress, ContractProvider, Sender, SendMode } from 'ton-core';
+
+export type CounterConfig = {};
+
+export function counterConfigToCell(config: CounterConfig): Cell {
+    return beginCell().endCell();
+}
+
+export class Counter implements Contract {
+    constructor(readonly address: Address, readonly init?: { code: Cell; data: Cell }) {}
+
+    static createFromAddress(address: Address) {
+        return new Counter(address);
+    }
+
+    static createFromConfig(config: CounterConfig, code: Cell, workchain = 0) {
+        const data = counterConfigToCell(config);
+        const init = { code, data };
+        return new Counter(contractAddress(workchain, init), init);
+    }
+
+    async sendDeploy(provider: ContractProvider, via: Sender, value: bigint) {
+        await provider.internal(via, {
+            value,
+            sendMode: SendMode.PAY_GAS_SEPARATELY,
+            body: beginCell().endCell(),
+        });
+    }
+
+    async sendNumber(provider: ContractProvider, via: Sender, value: bigint, number: bigint) {
+        await provider.internal(via, {
+            value,
+            sendMode: SendMode.PAY_GAS_SEPARATELY,
+            body: beginCell().storeUint(number, 32).endCell(),
+        });
+    }
+
+    async getTotal(provider: ContractProvider) {
+        const result = (await provider.get('get_total', [])).stack;
+        return result.readBigNumber();
+    }
+}
+```
+
 ## Деплоим контракт в тестовую сеть
 
-Для деплоя в тестовую сеть будем использовать интерфейса для командной строки [toncli](https://github.com/disintar/toncli/)
+Для деплоя в тестовую сеть будем использовать интерфейса для командной строки [Blueprint](https://github.com/ton-community/blueprint/)
 
-`toncli deploy -n testnet`
+`npx blueprint run`
+
+Далее следуем инструкциям. Выбираем тестовую сеть - testnet. Затем требуется способ авторизации кошелька, с которого будет производиться деплой. Можно подключить Tonkeeper или Tonhub, если выбрать первый пункт TON Connect.
+В консоли появится QR-код, который нужно отсканировать из приложения вашего кошелька на телефоне. Если такой способ не устраивает, можете воспользоваться одним из других предложенных способов.
+
+После успешного подключения кошелька, вероятно потребуется подтвердить отправку транзакции из приложения. Если вы всё сделали правильно, в консоли увидите сообщение о том, что контракт успешно задеплоен.
 
 ##### Что делать если пишет, что не хватает TON?
 
@@ -284,52 +445,60 @@ Toncli создал простой проект кошелька, в нем вы
 
 > Важно: Речь идет только о тестовой сети
 
-## Тестируем контракт
+## Проверяем контракт
 
 ##### Вызов recv_internal()
 
-Для вызова recv_internal() необходимо послать сообщение внутри сети TON. 
-С помощью [toncli send](https://github.com/disintar/toncli/blob/master/docs/advanced/send_fift_internal.md)
-
-Напишем небольшой скрипт на Fift, который будет отправлять 32-битное сообщение в наш контракт.
+Для вызова recv_internal() необходимо послать сообщение внутри сети TON. Для этого мы создали метод `sendNumber` в обёртке.
+Чтобы воспользоваться этим методом и отправить сообщение с кошелька, напишем небольшой скрипт на Typescript, который будет отправлять сообщение в наш контракт, используя обёртку.
 
 ##### Скрипт сообщения
 
-Для этого создадим в папке fift файл `try.fif` и напишем в нем следующий код:
+Для создадим в папке scripts файл `sendNumber.ts` и напишем в нем следующий код (большую часть которого можно скопировать из файла deployCounter.ts в той же папке):
  
-    "Asm.fif" include
-	
-	<b
-		11 32 u, // number
-	b>
-	
+```ts
+import { toNano } from 'ton-core';
+import { Counter } from '../wrappers/Counter';
+import { compile, NetworkProvider } from '@ton-community/blueprint';
 
-`"Asm.fif" include` - необходим для компиляции сообщения в байт код
+export async function run(provider: NetworkProvider) {
+    const counter = provider.open(Counter.createFromConfig({}, await compile('Counter')));
 
-Теперь рассмотрим сообщение:
+    // тут будет код
+}
+```
 
-`<b b>` - создают Builder ячейки, подробнее в пункте [5.2](https://ton-blockchain.github.io/docs/fiftbase.pdf)
+Этот код объявляет единственную функцию `run`, в которой мы можем взаимодействовать с нашим смарт-контрактом. Для этого создаётся объект `counter` класса-обёртки, который мы создавали выше в этом уроке.
+Теперь добавим в функцию вызов метода `sendNumber`:
 
-`10 32 u` - кладем 32-битное unsigned integer 10
+```ts
+await counter.sendNumber(provider.sender(), toNano('0.01'), 123n);
+```
 
-` // number` - однострочный комментарий
+Чтобы запустить скрипт, снова исполните команду `npx blueprint run` в консоли, но в этот раз, выберите нужный скрипт - то есть `sendNumber`. Скорее всего кошелёк уже будет подключен с момента деплоя, поэтому снова авторизацию проходить не понадобится.
 
-##### Деплоим получившееся сообщение
+Если вы видите в консоли надпись "**Sent transaction**", то наше сообщение контракту отправилось. Теперь давайте проверим, обновилось ли число в данных контракта с помощью метода `getTotal`.
 
-В командной строке:
+#### Скрипт гет-метода
 
-`toncli send -n testnet -a 0.03 --address "адрес вашего контракта" --body ./fift/try.fif`
+Создадим ещё один файл в директории scripts, например `getTotal.ts` и снова скопируем тот же код в него, но в этот раз воспользуемся нашим методом getTotal() из обёртки.
 
-Теперь протестируем GET функцию:
+```ts
+import { toNano } from 'ton-core';
+import { Counter } from '../wrappers/Counter';
+import { compile, NetworkProvider } from '@ton-community/blueprint';
 
-` toncli get get_total`
+export async function run(provider: NetworkProvider) {
+    const counter = provider.open(Counter.createFromConfig({}, await compile('Counter')));
 
-Должно получиться следующее:
+    console.log('Total:', await counter.getTotal());
+}
+```
 
-![toncli get send](./img/tonclisendget.png)
+Аналогично запустим скрипт с помощью команды `npx blueprint run` и после выполнения вы должны увидеть в консоли надпись "**Total: 123n**".
 
 ## Поздравляю вы дошли до конца
 
 ##### Задание
 
-Как вы могли заметить мы не протестировали работу исключений, модифицируйте сообщение таким образом чтобы смарт-контракт вызывал исключение
+Как вы могли заметить мы не протестировали работу исключений, модифицируйте сообщение в обёртке таким образом чтобы смарт-контракт вызывал исключение
