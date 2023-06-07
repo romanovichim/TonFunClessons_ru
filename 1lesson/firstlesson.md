@@ -56,7 +56,9 @@ cd my-counter
 
 Зайдите в папку contracts:
 
-    cd contracts
+```bash
+cd contracts
+```
 
 И откройте файл counter.func, на своем экране вы увидите смарт-контракт с всего одной пустой функцией. Теперь мы готовы начать писать наш первый смарт контракт.
 
@@ -113,9 +115,11 @@ cd my-counter
 
 Функция `recv_internal()` теперь выглядит так:
 
-    () recv_internal(int my_balance, int msg_value, cell in_msg_full, slice in_msg_body) impure {
-        int n = in_msg_body~load_uint(32);
-    }
+```func
+() recv_internal(int my_balance, int msg_value, cell in_msg_full, slice in_msg_body) impure {
+    int n = in_msg_body~load_uint(32);
+}
+```
 
 `load_uint` функция из [стандартной библиотеки FunC ](https://ton-blockchain.github.io/docs/#/func/stdlib) она загружает целое число n-бит без знака из слайса.
 
@@ -149,25 +153,29 @@ cd my-counter
 
 Теперь наша функция будет выглядеть так:
 
-    () recv_internal(int my_balance, int msg_value, cell in_msg_full, slice in_msg_body) impure {
-		int n = in_msg_body~load_uint(32);
+```func
+() recv_internal(int my_balance, int msg_value, cell in_msg_full, slice in_msg_body) impure {
+    int n = in_msg_body~load_uint(32);
 
-		slice ds = get_data().begin_parse();
-		int total = ds~load_uint(64);
-    }
+    slice ds = get_data().begin_parse();
+    int total = ds~load_uint(64);
+}
+```
 
 ##### Cуммируем
 
 Для суммирования будем использовать бинарную операцию суммирования `+`  и присвоение `=` 
 
-    () recv_internal(int my_balance, int msg_value, cell in_msg_full, slice in_msg_body) impure {
-		int n = in_msg_body~load_uint(32);
+```func
+() recv_internal(int my_balance, int msg_value, cell in_msg_full, slice in_msg_body) impure {
+    int n = in_msg_body~load_uint(32);
 
-		slice ds = get_data().begin_parse();
-		int total = ds~load_uint(64);
+    slice ds = get_data().begin_parse();
+    int total = ds~load_uint(64);
 
-		total += n;
-    }
+    total += n;
+}
+```
 
 ##### Cохраняем значение
 
@@ -189,16 +197,18 @@ cd my-counter
 
 Итог:
 
-    () recv_internal(int my_balance, int msg_value, cell in_msg_full, slice in_msg_body) impure {
-		int n = in_msg_body~load_uint(32);
+```func
+() recv_internal(int my_balance, int msg_value, cell in_msg_full, slice in_msg_body) impure {
+    int n = in_msg_body~load_uint(32);
 
-		slice ds = get_data().begin_parse();
-		int total = ds~load_uint(64);
+    slice ds = get_data().begin_parse();
+    int total = ds~load_uint(64);
 
-		total += n;
+    total += n;
 
-		set_data(begin_cell().store_uint(total, 64).end_cell());
-    }
+    set_data(begin_cell().store_uint(total, 64).end_cell());
+}
+```
 
 ## Генерация исключений
 
@@ -210,25 +220,28 @@ cd my-counter
 
 Воспользуемся `throw_if` и передадим любой код ошибки. Для того, чтобы взять битность используем `slice_bits()`.
 
-	throw_if(35,in_msg_body.slice_bits() < 32);
-	
+```func
+throw_if(35,in_msg_body.slice_bits() < 32);
+```
+
 Кстати в виртуальной машине TON TVM, есть стандартные коды исключений, они нам очень понадобятся в тестах. Посмотреть можно [здесь](https://ton-blockchain.github.io/docs/#/smart-contracts/tvm_exit_codes).
 
 Вставим в начало функции:
 
-    () recv_internal(int my_balance, int msg_value, cell in_msg_full, slice in_msg_body) impure {
-		throw_if(35,in_msg_body.slice_bits() < 32);
+```func
+() recv_internal(int my_balance, int msg_value, cell in_msg_full, slice in_msg_body) impure {
+    throw_if(35,in_msg_body.slice_bits() < 32);
 
-		int n = in_msg_body~load_uint(32);
+    int n = in_msg_body~load_uint(32);
 
-		slice ds = get_data().begin_parse();
-		int total = ds~load_uint(64);
+    slice ds = get_data().begin_parse();
+    int total = ds~load_uint(64);
 
-		total += n;
+    total += n;
 
-		set_data(begin_cell().store_uint(total, 64).end_cell());
-    }
-
+    set_data(begin_cell().store_uint(total, 64).end_cell());
+}
+```
 
 ## Пишем Get функцию
 
@@ -238,9 +251,11 @@ cd my-counter
 
 Напишем функцию get_total() возвращающую Integer и имеющую спецификацию method_id (об этом чуть позже)
  
-    int get_total() method_id {
-  	;; здесь будет код
-	}
+```func
+int get_total() method_id {
+    ;; здесь будет код
+}
+```
 
 ##### Method_id
 
@@ -252,36 +267,38 @@ cd my-counter
 Для того, что функция возвращала total хранящееся в контракте, нам надо взять данные из регистра, что мы уже делали:
 
  
-    int get_total() method_id {
-  		slice ds = get_data().begin_parse();
- 	 	int total = ds~load_uint(64);
-		
-  		return total;
-	}
-	
+```func
+int get_total() method_id {
+    slice ds = get_data().begin_parse();
+    int total = ds~load_uint(64);
+    
+    return total;
+}
+````	
 
 ## Весь код нашего смарт-контракта
 
+```func
+() recv_internal(int my_balance, int msg_value, cell in_msg_full, slice in_msg_body) impure {
+    throw_if(35,in_msg_body.slice_bits() < 32);
 
-    () recv_internal(int my_balance, int msg_value, cell in_msg_full, slice in_msg_body) impure {
-		throw_if(35,in_msg_body.slice_bits() < 32);
+    int n = in_msg_body~load_uint(32);
 
-		int n = in_msg_body~load_uint(32);
+    slice ds = get_data().begin_parse();
+    int total = ds~load_uint(64);
 
-		slice ds = get_data().begin_parse();
-		int total = ds~load_uint(64);
+    total += n;
 
-		total += n;
+    set_data(begin_cell().store_uint(total, 64).end_cell());
+}
 
-		set_data(begin_cell().store_uint(total, 64).end_cell());
-    }
-	 
-    int get_total() method_id {
-  		slice ds = get_data().begin_parse();
- 	 	int total = ds~load_uint(64);
-		
-  		return total;
-	}
+int get_total() method_id {
+    slice ds = get_data().begin_parse();
+    int total = ds~load_uint(64);
+
+    return total;
+}
+```
 	
 	
 ## Пишем обёртку для контракта на Typescript
