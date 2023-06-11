@@ -279,6 +279,8 @@ int get_total() method_id {
 ## Весь код нашего смарт-контракта
 
 ```func
+#include "imports/stdlib.fc";
+
 () recv_internal(int my_balance, int msg_value, cell in_msg_full, slice in_msg_body) impure {
     throw_if(35,in_msg_body.slice_bits() < 32);
 
