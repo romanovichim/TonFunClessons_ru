@@ -271,7 +271,7 @@ int get_total() method_id {
 int get_total() method_id {
     slice ds = get_data().begin_parse();
     int total = ds~load_uint(64);
-    
+
     return total;
 }
 ````	
