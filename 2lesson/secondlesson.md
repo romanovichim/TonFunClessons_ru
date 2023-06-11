@@ -5,7 +5,7 @@
 
 ## Требования
 
-Для прохождения данного урока вам достаточно установить [Node.js](https://nodejs.org) и пройти [первый урок](https://github.com/romanovichim/TonFunClessons_ru/blob/main/1lesson/firstlesson.md).
+Для прохождения данного урока вам достаточно установить [Node.js](https://nodejs.org) (желательно версии 18 или выше) и пройти [первый урок](https://github.com/romanovichim/TonFunClessons_ru/blob/main/1lesson/firstlesson.md).
 
 ##  Teсты для первого смарт-контракта
 
