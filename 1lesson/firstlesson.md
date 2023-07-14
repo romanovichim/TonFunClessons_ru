@@ -1,10 +1,11 @@
 # Урок 1 Простой смарт-контракт
+
 ## Введение
 
-В этом уроке мы напишем ваш первый смартконтракт в тестовой сети The Open Network на языке FUNC, задеплоим* его в тестовую сеть с помощью [Blueprint](https://github.com/ton-community/blueprint), а также протестируем его с помощью сообщения с помощью Javascript-библиотеки [ton](https://github.com/ton-core/ton).
+В этом уроке мы напишем ваш первый смартконтракт в тестовой сети The Open Network на языке FUNC, задеплоим\* его в тестовую сеть с помощью [Blueprint](https://github.com/ton-community/blueprint), а также протестируем его с помощью сообщения с помощью Javascript-библиотеки [ton](https://github.com/ton-core/ton).
 
-  > *Деплой  - процесс переноса в сеть (в данном случае смарт-контракта в блокчейн)
-  
+> \*Деплой - процесс переноса в сеть (в данном случае смарт-контракта в блокчейн)
+
 ## Требования
 
 Для прохождения данного урока вам достаточно установить [Node.js](https://nodejs.org). Желательно устанавливать одну из последних версий, например 18.
@@ -12,10 +13,11 @@
 ## Смарт-контракт
 
 Смарт-контракт, который мы будем делать, должен обладать следующей функциональностью:
-- хранить в своих данных целое число *total* - 64-битное число без знака;
-- при получении внутреннего входящего сообщения контракт, должен взять 32-битное целое число без знака из тела сообщения, добавить его к *total* и сохранить в данных контракта;
-- В смарт-контракте должен быть предусмотрен метод *get total* позволяющий вернуть значение *total* 
-- Если тело входящего сообщения меньше 32 бит, то контракт должен выдать исключение
+
+-   хранить в своих данных целое число _total_ - 64-битное число без знака;
+-   при получении внутреннего входящего сообщения контракт, должен взять 32-битное целое число без знака из тела сообщения, добавить его к _total_ и сохранить в данных контракта;
+-   В смарт-контракте должен быть предусмотрен метод _get total_ позволяющий вернуть значение _total_
+-   Если тело входящего сообщения меньше 32 бит, то контракт должен выдать исключение
 
 ## Создадим проект с помощью Blueprint
 
@@ -34,15 +36,17 @@ npm create ton@latest
 ```
 
 Blueprint создал простой проект. Перейдём в его директорию:
+
 ```bash
 cd my-counter
 ```
 
 Там вы можете увидеть 4 папки:
-- contracts;
-- wrappers;
-- scripts;
-- tests;
+
+-   contracts;
+-   wrappers;
+-   scripts;
+-   tests;
 
 На данном этапе нас интересуют папки contracts и wrappers, в которых мы будем писать код на FunС и обёртку для него на Typescript соответственно.
 
@@ -67,10 +71,10 @@ cd contracts
 У смарт-контрактов в сети TON есть два зарезервированных метода к которым можно обращаться.
 
 Первый, `recv_external()` эта функция выполняется когда запрос к контракту происходит из внешнего мира, то есть не из TON, например когда мы сами формируем сообщение и отправляем его через lite-client (Про установку [lite-client](https://ton-blockchain.github.io/docs/#/compile?id=lite-client)).
- Второй, `recv_internal()` эта функция выполняется когда внутри самого TON, например когда какой-либо контракт обращается к нашему.
- 
- > Легкий клиент (англ. lite-client) — это программное обеспечение, которое подключается к полным узлам для взаимодействия с блокчейном. Они помогают пользователям получать доступ к блокчейну и взаимодействовать с ним без необходимости синхронизации всего блокчейна.
- 
+Второй, `recv_internal()` эта функция выполняется когда внутри самого TON, например когда какой-либо контракт обращается к нашему.
+
+> Легкий клиент (англ. lite-client) — это программное обеспечение, которое подключается к полным узлам для взаимодействия с блокчейном. Они помогают пользователям получать доступ к блокчейну и взаимодействовать с ним без необходимости синхронизации всего блокчейна.
+
 Под наши условия подходит `recv_internal()`
 
 В файле `counter.fc` уже есть объявленная функция без кода:
@@ -80,9 +84,9 @@ cd contracts
     ;; здесь будет код
 }
 ```
- 
- >  ;;  две точки с запятой синтаксис однострочного комментария
- 
+
+> ;; две точки с запятой синтаксис однострочного комментария
+
 Функция принимает числа с балансом контракта, суммой входящего сообщения, ячейкой с исходным сообщением и слайс in_msg_body, в котором хранится только тело принимаемого сообщения. Также мы используем ключевое слово impure
 
 `impure` — ключевое слово, которое указывает на то, что функция изменяет данные смарт-контракта.
@@ -97,10 +101,10 @@ cd contracts
 
 В нашем просто смарт контракте мы будем использовать всего лишь четыре типа:
 
-- Cell(ячейка) - Ячейка TVM, состоящая из 1023 бит данных и до 4 ссылки на другие ячейки
-- Slice(слайс)- Частичное представление ячейки TVM, используемой для разбора данных из ячейки
-- Builder - Частично построенная ячейка, содержащая до 1023 бит данных и до четырех ссылок; может использоваться для создания новых ячеек
-- Integer - знаковое 257-разрядное целое число
+-   Cell(ячейка) - Ячейка TVM, состоящая из 1023 бит данных и до 4 ссылки на другие ячейки
+-   Slice(слайс)- Частичное представление ячейки TVM, используемой для разбора данных из ячейки
+-   Builder - Частично построенная ячейка, содержащая до 1023 бит данных и до четырех ссылок; может использоваться для создания новых ячеек
+-   Integer - знаковое 257-разрядное целое число
 
 Подробнее о типах в FunC:
 [кратко здесь](https://ton-blockchain.github.io/docs/#/smart-contracts/)
@@ -110,8 +114,8 @@ cd contracts
 
 ## Преобразуем полученный слайс в Integer
 
-Чтобы преобразовать полученный слайс в Integer  добавим следуюший код:
-`int n = in_msg_body~load_uint(32);` 
+Чтобы преобразовать полученный слайс в Integer добавим следуюший код:
+`int n = in_msg_body~load_uint(32);`
 
 Функция `recv_internal()` теперь выглядит так:
 
@@ -133,23 +137,23 @@ cd contracts
 
 Для хранения постоянных данных отведен регистр с4, тип данных Cell.
 
-Подробнее с регистрами можно ознакомиться [с4](https://ton-blockchain.github.io/docs/tvm.pdf)  в пункте 1.3
+Подробнее с регистрами можно ознакомиться [с4](https://ton-blockchain.github.io/docs/tvm.pdf) в пункте 1.3
 
 ##### Возьмем данные из с4
 
 Для того чтобы "достать" данные из с4 нам понадобятся две функции из [стандартной библиотеки FunC ](https://ton-blockchain.github.io/docs/#/func/stdlib) .
 
 А именно:
-`get_data`   - берет ячейку из c4 регистра.
-`begin_parse` -   ячейку преобразует в slice 
+`get_data` - берет ячейку из c4 регистра.
+`begin_parse` - ячейку преобразует в slice
 
 Передадим это значение в слайс ds
 
-`slice ds = get_data().begin_parse();` 
+`slice ds = get_data().begin_parse();`
 
 А также преобразуем этот слайс в Integer 64-бит для суммирования в соответствии с нашей задачей. (С помощью уже знакомой нам функции `load_uint`)
 
-`int total = ds~load_uint(64);` 
+`int total = ds~load_uint(64);`
 
 Теперь наша функция будет выглядеть так:
 
@@ -164,7 +168,7 @@ cd contracts
 
 ##### Cуммируем
 
-Для суммирования будем использовать бинарную операцию суммирования `+`  и присвоение `=` 
+Для суммирования будем использовать бинарную операцию суммирования `+` и присвоение `=`
 
 ```func
 () recv_internal(int my_balance, int msg_value, cell in_msg_full, slice in_msg_body) impure {
@@ -181,14 +185,14 @@ cd contracts
 
 Для того чтобы сохранить постоянное значение, нам необходимо выполнить четыре действия:
 
-- создать Builder для будущей ячейки
-- записать в нее значение
-- из Builder создать Cell (ячейку)
-- Записать получившуюся ячейку в регистр
+-   создать Builder для будущей ячейки
+-   записать в нее значение
+-   из Builder создать Cell (ячейку)
+-   Записать получившуюся ячейку в регистр
 
 Делать это мы будем опять же с помощью функций [стандартной библиотеки FunC ](https://ton-blockchain.github.io/docs/#/func/stdlib)
 
-`set_data(begin_cell().store_uint(total, 64).end_cell());` 
+`set_data(begin_cell().store_uint(total, 64).end_cell());`
 
 `begin_cell()` - создаст Builder для будущей ячейки
 `store_uint()`- запишет значение total
@@ -214,7 +218,7 @@ cd contracts
 
 Все что осталось сделать в нашей internal функции это добавить вызов исключения, если полученна переменная не 32-битная.
 
-Для этого будем использовать [встроенные](https://ton-blockchain.github.io/docs/#/func/builtins) исключения. 
+Для этого будем использовать [встроенные](https://ton-blockchain.github.io/docs/#/func/builtins) исключения.
 
 Исключения могут быть вызваны условными примитивами `throw_if` и `throw_unless` и безусловным `throw` .
 
@@ -245,12 +249,12 @@ throw_if(35,in_msg_body.slice_bits() < 32);
 
 ## Пишем Get функцию
 
-Любая функция в FunC  соответствует следующему паттерну:
+Любая функция в FunC соответствует следующему паттерну:
 
 `[<forall declarator>] <return_type><function_name(<comma_separated_function_args>) <specifiers>`
 
 Напишем функцию get_total() возвращающую Integer и имеющую спецификацию method_id (об этом чуть позже)
- 
+
 ```func
 int get_total() method_id {
     ;; здесь будет код
@@ -266,7 +270,6 @@ int get_total() method_id {
 
 Для того, что функция возвращала total хранящееся в контракте, нам надо взять данные из регистра, что мы уже делали:
 
- 
 ```func
 int get_total() method_id {
     slice ds = get_data().begin_parse();
@@ -274,7 +277,7 @@ int get_total() method_id {
 
     return total;
 }
-````	
+```
 
 ## Весь код нашего смарт-контракта
 
@@ -301,8 +304,7 @@ int get_total() method_id {
     return total;
 }
 ```
-	
-	
+
 ## Пишем обёртку для контракта на Typescript
 
 Мы хотим иметь возможность взаимодействовать с нашим смарт-контрактом. Для этого напишем так называемую обёртку на языке Typescript (типизированный Javascript).
@@ -400,7 +402,16 @@ return result.readBigNumber();
 ### Весь код обёртки
 
 ```ts
-import { Address, beginCell, Cell, Contract, contractAddress, ContractProvider, Sender, SendMode } from 'ton-core';
+import {
+    Address,
+    beginCell,
+    Cell,
+    Contract,
+    contractAddress,
+    ContractProvider,
+    Sender,
+    SendMode,
+} from 'ton-core';
 
 export type CounterConfig = {};
 
@@ -409,7 +420,10 @@ export function counterConfigToCell(config: CounterConfig): Cell {
 }
 
 export class Counter implements Contract {
-    constructor(readonly address: Address, readonly init?: { code: Cell; data: Cell }) {}
+    constructor(
+        readonly address: Address,
+        readonly init?: { code: Cell; data: Cell }
+    ) {}
 
     static createFromAddress(address: Address) {
         return new Counter(address);
@@ -429,7 +443,12 @@ export class Counter implements Contract {
         });
     }
 
-    async sendNumber(provider: ContractProvider, via: Sender, value: bigint, number: bigint) {
+    async sendNumber(
+        provider: ContractProvider,
+        via: Sender,
+        value: bigint,
+        number: bigint
+    ) {
         await provider.internal(via, {
             value,
             sendMode: SendMode.PAY_GAS_SEPARATELY,
@@ -457,7 +476,7 @@ export class Counter implements Contract {
 
 ##### Что делать если пишет, что не хватает TON?
 
-Необходимо получить их с тестового крана, бот для этого [@testgiver_ton_bot](https://t.me/testgiver_ton_bot). 
+Необходимо получить их с тестового крана, бот для этого [@testgiver_ton_bot](https://t.me/testgiver_ton_bot).
 
 Чтобы проверить пришли ли TON на ваш кошелек в тестовой сети, можете использовать вот этот explorer: https://testnet.tonscan.org/
 
@@ -473,14 +492,16 @@ export class Counter implements Contract {
 ##### Скрипт сообщения
 
 Создадим в папке scripts файл `sendNumber.ts` и напишем в нем следующий код (большую часть которого можно скопировать из файла deployCounter.ts той же папки):
- 
+
 ```ts
 import { toNano } from 'ton-core';
 import { Counter } from '../wrappers/Counter';
 import { compile, NetworkProvider } from '@ton-community/blueprint';
 
 export async function run(provider: NetworkProvider) {
-    const counter = provider.open(Counter.createFromConfig({}, await compile('Counter')));
+    const counter = provider.open(
+        Counter.createFromConfig({}, await compile('Counter'))
+    );
 
     // тут будет код
 }
@@ -507,7 +528,9 @@ import { Counter } from '../wrappers/Counter';
 import { compile, NetworkProvider } from '@ton-community/blueprint';
 
 export async function run(provider: NetworkProvider) {
-    const counter = provider.open(Counter.createFromConfig({}, await compile('Counter')));
+    const counter = provider.open(
+        Counter.createFromConfig({}, await compile('Counter'))
+    );
 
     console.log('Total:', await counter.getTotal());
 }
