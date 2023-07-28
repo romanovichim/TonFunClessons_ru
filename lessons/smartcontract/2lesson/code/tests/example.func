@@ -1,0 +1,99 @@
+;; Each test function must specify method_id
+;; Test functions method_id need to started from 0
+
+;; Each test functions must to be in pairs
+;; First funtion expect nothing in arguments
+;; But need to return:
+;;        function selector - which function to test, e.g. 0 for recv_internal, -1 recv_external, 85143 for seqno, and so on
+;;        tuple - stack values needed to be passed to function in tuple
+;;        c4 cell - start data of smart contract
+;;        c7 tuple / null
+;;        gas limit integer / null
+
+[int, tuple, cell, tuple, int] test_example_data() method_id(0) {
+   
+    int function_selector = 0;
+
+    cell message = begin_cell()     
+            .store_uint(10, 32)         
+            .end_cell();
+
+    tuple stack = unsafe_tuple([message.begin_parse()]); ;; stack that will be passed to function
+
+    cell data = begin_cell()             
+        .store_uint(0, 64)             
+        .end_cell();
+
+    return [function_selector, stack, data, get_c7(), null()];
+}
+
+
+;; After test data function
+;; We need to define test funtion
+;; It will accept:
+;;        exit code - exit code of runvm, here you can check errors / not
+;;        c4 cell - data of smart contract after runvm invokes
+;;        tuple - stack values of smart contract
+;;        c5 cell - here you can check all outcoming messages
+;;        gas - gas that was used
+;; By default test is passed
+;; You can use throw_if to fail test
+
+_ test_example(int exit_code, cell data, tuple stack, cell actions, int gas) method_id(1) {
+    throw_if(100, exit_code != 0); 
+
+    var ds = data.begin_parse();
+
+    throw_if(101, ds~load_uint(64) != 10); 
+    throw_if(102, gas > 1000000); 
+}
+
+
+
+;;   GET test
+
+
+[int, tuple, cell, tuple, int] test_get_total_data() method_id(2) {
+    int function_selector = 128253; 
+    tuple stack = unsafe_tuple([]); 
+
+    cell data = begin_cell()             
+        .store_uint(10, 64)              
+        .end_cell();
+
+    return [function_selector, stack, data, get_c7(), null()];
+}
+
+_ test_get_total(int exit_code, cell data, tuple stack, cell actions, int gas) method_id(3) {
+    throw_if(103, exit_code != 0); 
+    int counter = first(stack); ;; get answer from get method
+    throw_if(104, counter != 10); 
+}
+
+
+
+
+
+;;; exceptions
+
+[int, tuple, cell, tuple, int] test_exception_data() method_id(4) {
+
+    int function_selector = 0;
+
+    ;; Example contract message body
+    cell message = begin_cell()     
+            .store_uint(30, 31)           
+            .end_cell();
+
+    tuple stack = unsafe_tuple([message.begin_parse()]); ;; stack that will be passed to function
+
+    cell data = begin_cell()             
+        .store_uint(0, 64)               
+        .end_cell();
+
+    return [function_selector, stack, data, get_c7(), null()];
+}
+
+_ test_exception(int exit_code, cell data, tuple stack, cell actions, int gas) method_id(5) {
+    throw_if(100, exit_code == 0);
+}

@@ -1,0 +1,12 @@
+"TonUtil.fif" include
+"Asm.fif" include
+
+"build/contract.pk" load-generate-keypair // generate key pair
+constant private_key  // save private to constant
+constant public_key // save public to constant
+
+<b
+  0 32 u, // seqno
+  0 32 u, // subwallet-id
+  public_key B, // add bin public key to cell
+b>
