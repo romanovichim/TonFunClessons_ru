@@ -45,8 +45,8 @@
 
 | Урок | Рассмотренные концепции  | Ссылка | 
 | ------------- | ------------- | ------------- | 
-| TON Connect auth button|   | [LINK](./lessons/tonconnect/button.md) | 
-| TON Connect send transaction |   | [LINK](./lessons/tonconnect/sendtx.md) | 
+| TON Connect auth button| Простой сайт с авторизацией через TonConnect, концепция разделения на кошельки и приложения Web3  | [LINK](./lessons/tonconnect/button.md) | 
+| TON Connect send transaction | Использование Обёрток контрактов, отправка транзакций, вызов Get-методов c Фронтеда  | [LINK](./lessons/tonconnect/sendtx.md) | 
 
 # Golang Scripts - удобные скрипты для работы с TON
 
