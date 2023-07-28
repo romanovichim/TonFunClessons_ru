@@ -45,8 +45,8 @@
 
 | Урок | Рассмотренные концепции  | Ссылка | 
 | ------------- | ------------- | ------------- | 
-| TON Connect login button|   | [LINK]() | 
-| TON Connect send transaction |   | [LINK]() | 
+| TON Connect auth button|   | [LINK](./lessons/tonconnect/button.md) | 
+| TON Connect send transaction |   | [LINK](./lessons/tonconnect/sendtx.md) | 
 
 # Golang Scripts - удобные скрипты для работы с TON
 
