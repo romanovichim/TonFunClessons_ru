@@ -1,355 +1,112 @@
 # Урок 4 Тесты на FunC для прокси смарт-контракта
+
 ## Введение
 
-В этом уроке мы напишем тесты для смарт-контракта созданного в третьем уроке в тестовой сети The Open Network на языке FUNC и  выполним их с помощью [toncli](https://github.com/disintar/toncli).
+В этом уроке мы напишем тесты для смарт-контракта созданного в третьем уроке в тестовой сети The Open Network на языке FUNC и выполним их с помощью [Blueprint](https://github.com/ton-community/blueprint).
 
 ## Требования
 
-Для прохождения данного урока вам необходимо установить интерфейс для командной строки [toncli](https://github.com/disintar/toncli/blob/master/INSTALLATION.md) и пройти [третий урок](https://github.com/romanovichim/TonFunClessons_ru/blob/main/3lesson/thirdlesson.md) .
+Для прохождения данного урока вам достаточно установить [Node.js](https://nodejs.org). Желательно устанавливать одну из последних версий, например 18.
 
-## Важно
+А также пройти [третий урок](https://github.com/romanovichim/TonFunClessons_ru/blob/main/3lesson/thirdlesson.md).
 
-Написанное ниже, описывает старую версию тестов. Новый тесты toncli, на данный момент доступны для dev версии func/fift, инструкция [здесь](https://github.com/disintar/toncli/blob/master/docs/advanced/func_tests_new.md), урок по новым тестам [тут](https://github.com/romanovichim/TonFunClessons_ru/blob/main/11lesson/11lesson.md). Выход новых тестов не означает, что уроки по старым бессмысленные - они хорошо передают логику, поэтому успехов в прохождении урока. Также отмечу, что старые тесты можно использовать с флагом `--old` при использовании `toncli run_tests`
-
-##  Teсты для прокси смарт-контракта 
+## Teсты для прокси смарт-контракта
 
 Для нашего прокси смарт-контракта мы напишем следующие тесты:
 
-- test_same_addr() тестируем, что при отправке сообщения в контракт от владельца пересылка не должна осуществляться
-- test_example_data() тестируем остальные условия [третьего урока](https://github.com/romanovichim/TonFunClessons_ru/blob/main/3lesson/thirdlesson.md)
+-   При отправке сообщения в контракт от владельца пересылка не должна осуществляться
+-   Остальные условия [третьего урока](https://github.com/romanovichim/TonFunClessons_ru/blob/main/3lesson/thirdlesson.md) должны выполняться
 
-## Структура тестов на FunC под toncli
+## Тестируем вызов прокси контракта его владельцем
 
-Напомню, что для каждого теста на FunC под toncli надо написать две функции. Первая будет определять данные(в терминах TON правильней будет сказать состояние, но надеюсь что данные более понятная аналогия), которые мы будем отправлять во вторую для проведения тестов. 
+Напишем первый тест для прокси контракта и разберем его код.
 
-Каждая тестовая функция должна указывать method_id. Тестовые функции method_id нужно запускать с 0.
+```ts
+it('should not forward from owner', async () => {
+    const result = await deployer.send({
+        to: proxy.address,
+        value: toNano('1'),
+    });
+    expect(result.transactions).not.toHaveTransaction({
+        from: proxy.address,
+        to: deployer.address,
+    });
+});
+```
 
+Сначала мы отправляем сообщение с кошелька `deployer` на `proxy` с суммой `1 TON`.
 
-##### Функция данных
+Как мы помним, наш контракт не должен пересылать сообщения от владельца ему же самому. Поэтому условием прохождения теста должно быть **отсутствие** такой транзакции. Такую проверку можно реализовать, добавив `.not` перед `.toHaveTransaction`.
 
-Функция с данными не принимает никаких аргументов, но должна возвращать:
-- function selector - id вызываемой функции в тестируемом контракте; 
-- tuple - (стек) значения которые мы будем передавать в функцию выполнящую тесты;
-- c4 cell - "постоянные данные" в управляющем регистре c4;
-- c7 tuple  - "временные данные" в управляющем регистре с7;
-- gas limit integer - лимит газа (для понимания концепции gas советую сначала почитать про это в [Ethereum](https://ethereum.org/en/developers/docs/gas/));
+> Примечание: условия для тестов (ключевое слово `expect`) работают через библиотеку **Jest**. Её синтаксис довольно простой и зачастую можно догадаться как что-то проверить, просто написав это по-английски. Названия всех функций чётко отражают её суть. Например `toEqual` проверяет, что два значения равны, а `toBeLessThan` проверяет, что одно значение меньше другого.
 
-> Газ измеряет количество вычислительных усилий, необходимых для выполнения определенных операций в сети
+Получаем условие, что в результате выполнения всей цепочки действий не должно быть ни одной транзакции от `proxy` к `deployer`.
 
-Про регистры подробнее c4 и с7 [здесь](https://ton-blockchain.github.io/docs/tvm.pdf) в 1.3.1
+## Тестируем вызов прокси контракта другим кошельком
 
-##### Функция тестов
+Напишем второй тест для прокси контракта и разберем его код.
 
-Функция тестов должна принимать следующие аргументы:
+```ts
+it('should forward from another wallet', async () => {
+    let user = await blockchain.treasury('user');
+    const result = await user.send({
+        to: proxy.address,
+        value: toNano('1'),
+        body: beginCell().storeStringTail('Hello, world!').endCell(),
+    });
+    expect(result.transactions).toHaveTransaction({
+        from: proxy.address,
+        to: deployer.address,
+        body: beginCell()
+            .storeAddress(user.address)
+            .storeRef(beginCell().storeStringTail('Hello, world!').endCell())
+            .endCell(),
+        value: (x) => (x ? toNano('0.99') <= x && x <= toNano('1') : false),
+    });
+});
+```
 
-- exit code - код возврата виртуальной машины, чтобы мы могли понять ошибка или нет
-- c4 cell - "постоянные данные" в управляющем регистре c4
-- tuple - (стек) значения которые мы передаем от функции данных
-- c5 cell - для проверки исходящих сообщений
-- gas - газ, который был использован
+Сначала создаём новый кошелёк так же, как в коде выше создаётся `deployer`:
 
-[Коды возврата TVM](https://ton-blockchain.github.io/docs/#/smart-contracts/tvm_exit_codes)
+```ts
+let user = await blockchain.treasury('user');
+```
 
-## Приступим к написанию тестов
+Далее посылаем сообщение от `user` к `proxy` с суммой `1 TON` и комментарием `Hello, world!`.
 
-Для тестов  в данном уроке нам будет необходима вспомогательная функция сравнения. Определим её как низкоуровневый примитив с помощью ключевого слова `asm`:
+Теперь наш контракт уже должен перенаправить это сообщение к владельцу. Поэтому проверяем, что оно там действительно есть через `.toHaveTransaction` без использования `.not`. Также для более точной проверки мы используем параметры `body` и `value`.
 
-`int equal_slices (slice a, slice b) asm "SDEQ";`
+В `body` должна лежать ячейка, содержащая адрес отправителя исходного сообщения (то есть `user.address`), а затем в рефе должно лежать исходное тело сообщения. Поэтому проверяем, чтобы `body` был равен
 
+```
+beginCell().storeAddress(user.address)
+    .storeRef(beginCell().storeStringTail('Hello, world!').endCell())
+.endCell()
+```
 
-## Тестируем вызов прокси контракта
+Для проверки `value` используется необычная конструкция, давайте разберём её детальнее:
 
-Напишем первый тест `test_example_data()`  и разберем его код.
+```ts
+value: (x) => (x ? toNano('0.99') <= x && x <= toNano('1') : false)
+```
 
-##### Функция данных
+"Мэтчеры" из `.toHaveTransaction` могут принимать как само значение, которое мы ожидаем, так и функцию, которая делает какую-то более сложную проверку и возвращает булевое значение с результатом этой проверки.
+В нашем случае, мы не знаем какую точно сумму отправит прокси-контракт владельцу, ведь мы для отправки используем в контракте режим 64, а значит комиссии вычтутся из суммы сообщения. Поэтому мы хотим проверить, что сумма сообщения приблизительно равна 1.
+Для этого мы пишем так назвыаемую "стрелочную функцию", которую не надо объявлять заранее. Эта функция принимает какое-то значение `x` и возврашает `true` если оно больше или равно `0.99 TON` и меньше или равно `1 TON`. Также тернарным выражением мы проверяем, что `x` не является `undefined` чтобы мы могли провести проверку на его значение, а в противном случае возвращаем `false`.
 
-Начнем с функции данных:
+## Запускаем тесты
 
-	[int, tuple, cell, tuple, int] test_example_data() method_id(0) {
-		int function_selector = 0;
+Выполним в терминале команду `npx blueprint test`. Результат должен быть примерно такой:
 
-		cell my_address = begin_cell()
-					.store_uint(1, 2)
-					.store_uint(5, 9) 
-					.store_uint(7, 5)
-					.end_cell();
+```
+ PASS  tests/Proxy.spec.ts
+  Proxy
+    ✓ should not forward from owner (147 ms)
+    ✓ should forward from another wallet (69 ms)
+```
 
-		cell their_address = begin_cell()
-					.store_uint(1, 2)
-					.store_uint(5, 9) 
-					.store_uint(8, 5) 
-					.end_cell();
+Если какие то тесты у вас не прошли, просмотрите код и текст этого урока ещё раз. Также сверьте свой код смарт-контракта с кодом из предыдущего урока.
 
-		slice message_body = begin_cell().store_uint(12345, 32).end_cell().begin_parse();
+## Заключение
 
-		cell message = begin_cell()
-				.store_uint(0x6, 4)
-				.store_slice(their_address.begin_parse()) 
-				.store_slice(their_address.begin_parse()) 
-				.store_grams(100)
-				.store_uint(0, 1 + 4 + 4 + 64 + 32 + 1 + 1)
-				.store_slice(message_body)
-				.end_cell();
-
-		tuple stack = unsafe_tuple([12345, 100, message, message_body]);
-
-		return [function_selector, stack, my_address, get_c7(), null()];
-	}
-
-## Разбираем
-
-`int function_selector = 0;`
-
-Так как мы вызывам `recv_internal()`  мы присваиваем значение 0, почему именно 0? В Fift(а именно в него мы компилируем наши FunC скрипты) есть предопределенные идентификаторы, а именно:
-- `main` и `recv_internal` имеют id = 0
-- `recv_external` имеют id = -1
-- `run_ticktock` имеют id = -2
-
-Чтобы проверить отправку нам нужны адреса с которых мы будем отправлять сообщения, пускай в данном примере у нас будет наш адрес `my_address` и их адрес `their_address`. Возникает вопрос, как должен выглядять адрес, учитывая что его нужно задачать типами FunC. Обратимся к [TL-B схеме](https://github.com/ton-blockchain/ton/blob/master/crypto/block/block.tlb) , а конкретно к строке 100, там начинаются описания адресов.
-
-	cell my_address = begin_cell()
-				.store_uint(1, 2)
-				.store_uint(5, 9) 
-				.store_uint(7, 5)
-				.end_cell();
-
-`.store_uint(1, 2)` - 0x01 внешний адрес;
-
-`.store_uint(5, 9)` - len равный 5;
-
-`.store_uint(7, 5)` - и пускай наш адрес будет 7;
-
-Для того, чтобы разобраться в TL-B и данном куске конкретно, сооветую изучить https://core.telegram.org/mtproto/TL .
-
-Также сооберем еще один адрес, пускай он будет 8.
-
-	cell their_address = begin_cell()
-				.store_uint(1, 2)
-				.store_uint(5, 9) 
-				.store_uint(8, 5) 
-				.end_cell();
-
-Для сборки сообщения осталось собрать слайс тела сообшения, положим туда число 12345
-
-	slice message_body = begin_cell().store_uint(12345, 32).end_cell().begin_parse();
-
-Теперь осталось собрать само сообщение: 
-
-	cell message = begin_cell()
-			.store_uint(0x6, 4)
-			.store_slice(their_address.begin_parse()) 
-			.store_slice(their_address.begin_parse()) 
-			.store_grams(100)
-			.store_uint(0, 1 + 4 + 4 + 64 + 32 + 1 + 1)
-			.store_slice(message_body)
-			.end_cell();
-
-Отмечу, что адреса мы собирали в ячейки, соответственно чтобы хранить их в сообщении с помощью `store_slice()` нужно использовать `begin_parse()`, которая превратит ячейку в слайс.
-
-Как вы могли заметить и отправитель и получатель это один адрес, сделано это чтобы упростить тесты и не плодить большое количество адресов, так как по условию при отправке сообщения в контракт от  **только** владельца пересылка не должна осуществляться.
-
-Теперь напомню, что должна возвращать функция:
-- function selector - id вызываемой функции в тестируемом контракте; 
-- tuple - (стек) значения которые мы будем передавать в функцию выполнящую тесты;
-- c4 cell - "постоянные данные" в управляющем регистре c4;
-- c7 tuple  - "временные данные" в управляющем регистре с7;
-- gas limit integer 
-
-Как вы могли заметить нам осталось собрать tuple и вернуть данные. В соответствии с сигнатурой (синтаксическую конструкцию объявления функции) recv_internal() нашего контракта положим туда следущие значения:
-
-	tuple stack = unsafe_tuple([12345, 100, message, message_body]);
-
-Отмечу что возвращать мы уже будем `my_address`, это необходимо для проверки условия совпадения адресов.
-
-	return [function_selector, stack, my_address, get_c7(), null()];
-		
-Как можно видеть, в  с7 положили текущее состояние с7 с помощью `get_c7()` ,а в gas limit integer положим `null()`. 
-
-##### Функция тестов
-
-Код:
-
-	_ test_example(int exit_code, cell data, tuple stack, cell actions, int gas) method_id(1) {
-		throw_if(100, exit_code != 0);
-
-		slice actions = actions.begin_parse();
-		throw_if(101, actions~load_uint(32) != 0x0ec3c86d); 
-
-
-		throw_if(102, ~ slice_empty?(actions~load_ref().begin_parse())); 
-
-		slice msg = actions~load_ref().begin_parse();
-		throw_if(103, msg~load_uint(6) != 0x10);
-
-		slice send_to_address = msg~load_msg_addr();
-		slice expected_my_address = begin_cell().store_uint(1, 2).store_uint(5, 9).store_uint(7, 5).end_cell().begin_parse();
-
-		throw_if(104, ~ equal_slices(expected_my_address, send_to_address));
-		throw_if(105, msg~load_grams() != 0);
-		throw_if(106, msg~load_uint(1 + 4 + 4 + 64 + 32 + 1 + 1) != 0);
-
-		slice sender_address = msg~load_msg_addr();
-		slice expected_sender_address = begin_cell().store_uint(1, 2).store_uint(5, 9).store_uint(8, 5).end_cell().begin_parse();
-		throw_if(107, ~ equal_slices(sender_address, expected_sender_address));
-
-		slice fwd_msg = msg~load_ref().begin_parse();
-
-		throw_if(108, fwd_msg~load_uint(32) != 12345);
-		fwd_msg.end_parse();
-
-		msg.end_parse();
-	}
-
-## Разбираем
-
-`throw_if(100, exit_code != 0);`
-
-Проверям код возврата, функция создаст исключение, если код возврата не равен нулю.
-0 - стандартный код возврата из успешного выполнения смарт-контракта.
-
-	slice actions = actions.begin_parse();
-	throw_if(101, actions~load_uint(32) != 0x0ec3c86d);
-	
-Исходящие сообщения записываются в регистр с5 , соответственно выгрузим оттуда 32-ух битное значение(`load_uint` функция из стандартной бибилотеки FunC она загружает целое число n-бит без знака из слайса.) и выдадим ошибку если оно не равно 0x0ec3c86d т.е была произведена не отправка сообщения. Число 0x0ec3c86d можно взять из [TL-B cхемы 371 строка](https://github.com/ton-blockchain/ton/blob/d01bcee5d429237340c7a72c4b0ad55ada01fcc3/crypto/block/block.tlb), а чтобы убедиться что `send_raw_message` использует `action_send_msg` посмотрим стандартную библиотеку [764 строку](https://github.com/ton-blockchain/ton/blob/24dc184a2ea67f9c47042b4104bbb4d82289fac1/crypto/vm/tonops.cpp) .
-
-![github ton](./img/send_action.PNG)
-
-
-Прежде чем двигаться дальше, надо разобраться как храняться данные в с5 из [документации](https://ton-blockchain.github.io/docs/#/smart-contracts/tvm_overview?id=result-of-tvm-execution). В с5 храняться две ссылки на ячейки с последним действием в списке и ссылка ячейку с предыдущим действием соответственно.
-Подробнее как достать данные из actions полностью, будет описано в коде ниже в задании. Сейчас же главное, то что мы выгрузим первую ссылку из c5 и сразу же проверим, что она не пустая, чтобы далее можно было взять ячейку с сообщением.
-
-throw_if(102, ~ slice_empty?(actions~load_ref().begin_parse()));
-
-Проверяем мы с помощью `slice_empty?` из [стандартной библиотеки FunC](https://ton-blockchain.github.io/docs/#/func/stdlib?id=slice_empty).
-
-Из ячейки "действий" нужно взять слайс сообщений, возьмем ссылку на ячейку с сообщением с помощью `load_ref()` и преобразуем её в слайс с помощью `begin_parse()`.
-
-	slice msg = actions~load_ref().begin_parse();
-	
-Продолжим:
-
-	slice send_to_address = msg~load_msg_addr();
-	slice expected_my_address = begin_cell().store_uint(1, 2).store_uint(5, 9).store_uint(7, 5).end_cell().begin_parse();
-
-	throw_if(104, ~ equal_slices(expected_my_address, send_to_address));
-
-Начинаем вычитывать сообщение. Проверяем адрес получателя, загрузив из сообщения адрес с помощью `load_msg_addr()` - которая загружает из слайса единственный префикс, который является допустимым MsgAddress.
-
-В слайс `expected_my_address` положим такой же адрес, который мы собрали в функции определяющей данные.
-
-И соответственно проверим их не совпадение с помощью заранее объявленной `equal_slices()` . Так как функция проверят равенство для проверки неравенства, используем  унарный оператор ` ~` , который являетcя побитовым не (Про битовые операции хорошо описано на [википедии](https://ru.wikipedia.org/wiki/%D0%91%D0%B8%D1%82%D0%BE%D0%B2%D0%B0%D1%8F_%D0%BE%D0%BF%D0%B5%D1%80%D0%B0%D1%86%D0%B8%D1%8F)).
-
-    throw_if(105, msg~load_grams() != 0);
-    throw_if(106, msg~load_uint(1 + 4 + 4 + 64 + 32 + 1 + 1) != 0);
-	
-С помощью `load_grams()`  и `load_uint()`  из [стандартной библиотеки](https://ton-blockchain.github.io/docs/#/func/stdlib?id=load_grams) проверяем кол-во Tоn в сообщении не равно 0 и прочие служебые поля, которые можно посмотреть в [схеме сообщения](https://ton-blockchain.github.io/docs/#/smart-contracts/messages), вычитывая их из сообщения.
-
-	slice sender_address = msg~load_msg_addr();
-	slice expected_sender_address = begin_cell().store_uint(1, 2).store_uint(5,9).store_uint(8, 5).end_cell().begin_parse();
-	throw_if(107, ~ equal_slices(sender_address, expected_sender_address));
-	
-Продолжая вычитывать сообщения, проверяем адрес отправителя, также как мы ранее проверяли адрес получателя.
-
-	slice fwd_msg = msg~load_ref().begin_parse();
-	throw_if(108, fwd_msg~load_uint(32) != 12345);
-
-Осталось проверить значение в теле сообщения.  Сначала возьмем загрузим ссылку на ячейку  из сообщения с помощью `load_ref()` и преобразуем ей в слайс `begin_parse()`.  И соотвественно загрузим 32-ух битное значение(`load_uint` функция из стандартной бибилотеки FunC она загружает целое число n-бит без знака из слайса.) проверив его с нашим значением 12345. 
-
-
-	fwd_msg.end_parse();
-
-		msg.end_parse();
-		
-В самом конце мы мы проверяем после вычитки остался ли слайс пустым, как всего сообщения, так и тела сообщения из которого мы брали значение. Важно отметить, что  `end_parse()`  выдает исключение, если слайс не пустой, что очень удобно в тестах.
-
-## Тестируем тот же адрес 
-
-По задаче из [третьего урока](https://github.com/romanovichim/TonFunClessons_ru/blob/main/3lesson/thirdlesson.md)  при отправке сообщения в контракт от владельца пересылка не должна осуществляться, протестируем это.
-
-##### Функция данных
-
-Начнем с функции данных:
-
-	[int, tuple, cell, tuple, int] test_same_addr_data() method_id(2) {
-		int function_selector = 0;
-
-		cell my_address = begin_cell()
-								.store_uint(1, 2) 
-								.store_uint(5, 9)
-								.store_uint(7, 5)
-								.end_cell();
-
-		slice message_body = begin_cell().store_uint(12345, 32).end_cell().begin_parse();
-
-		cell message = begin_cell()
-				.store_uint(0x6, 4)
-				.store_slice(my_address.begin_parse()) 
-				.store_slice(my_address.begin_parse())
-				.store_grams(100)
-				.store_uint(0, 1 + 4 + 4 + 64 + 32 + 1 + 1)
-				.store_slice(message_body)
-				.end_cell();
-
-		tuple stack = unsafe_tuple([12345, 100, message, message_body]);
-
-		return [function_selector, stack, my_address, get_c7(), null()];
-	}
-
-
-## Разбираем
-
-Функция данных практически никак не отличается от предыдущей функции данных единственное отличие, адрес всего один, так как мы тестируем, что будет если прислать сообщение в прокси смарт-контракт со своего адреса. Отправлять опять же будем сами себе, для экономии нашего времени на написание теста.
-
-##### Функция тестов
-
-Код:
-
-	_ test_same_addr(int exit_code, cell data, tuple stack, cell actions, int gas) method_id(3) {
-		throw_if(100, exit_code != 0);
-
-		throw_if(102, ~ slice_empty?(actions.begin_parse())); 
-
-	}
-	
-Опять же проверяем код возврата, функция создаст исключение, если код возврата не равен нулю.
-
-`throw_if(100, exit_code != 0);`
-
-0 - стандартный код возврата из успешного выполнения смарт-контракта.
-
-`throw_if(102, ~ slice_empty?(actions.begin_parse()));`
-
-Так как прокси контракт не должен отправлять сообщение, то мы просто проверяем, что слайс пустой с помощью `slice_empty?`, подробнее о функции [здесь](https://ton-blockchain.github.io/docs/#/func/stdlib?id=slice_empty) .
-
-## Задание
-
-Как вы могли заметить мы не протестировали режим, в котором мы отсылали сообщение с помощью `send_raw_message;`.
-
-##### Подсказка
-
-Пример функции "разбирающей сообщение":
-
-	(int, cell) extract_single_message(cell actions) impure inline method_id {
-		;; ---------------- Parse actions list
-		;; prev:^(OutList n)
-		;; #0ec3c86d
-		;; mode:(## 8)
-		;; out_msg:^(MessageRelaxed Any)
-		;; = OutList (n + 1);
-		slice cs = actions.begin_parse();
-		throw_unless(1010, cs.slice_refs() == 2);
-		
-		cell prev_actions = cs~load_ref();
-		throw_unless(1011, prev_actions.cell_empty?());
-		
-		int action_type = cs~load_uint(32);
-		throw_unless(1013, action_type == 0x0ec3c86d);
-		
-		int msg_mode = cs~load_uint(8);
-		throw_unless(1015, msg_mode == 64); 
-		
-		cell msg = cs~load_ref();
-		throw_unless(1017, cs.slice_empty?());
-		
-		return (msg_mode, msg);
-	}
+В этом уроке мы успешно протестироавли наш прокси-контракт и убедились, что он работает как надо.
