@@ -130,6 +130,8 @@ Hashmap - это структура данных представленная д
 
 Итого каркас контракта следующий:
 
+    #include "imports/stdlib.fc";
+
     () recv_internal(int balance, int msg_value, cell in_msg_full, slice in_msg_body) {
     	int op = in_msg_body~load_uint(32);
     	int query_id = in_msg_body~load_uint(64);

@@ -19,7 +19,41 @@
 
 ## Тестируем вызов прокси контракта его владельцем
 
-Напишем первый тест для прокси контракта и разберем его код.
+Откроем файл `tests/Proxy.spec.ts`, в котором уже написана база для наших тестов. В нём для удобства вынесем объявление `deployer` за пределы функции `beforeEach`, чтобы можно было к нему обращаться из всех тестов. Также нужно добавить в конфиг контаркта при деплое те параметры, которые мы в нём задавали. Должно получиться примерно так:
+
+```ts
+let blockchain: Blockchain;
+let proxy: SandboxContract<Proxy>;
+let deployer: SandboxContract<TreasuryContract>;
+
+beforeEach(async () => {
+    blockchain = await Blockchain.create();
+
+    deployer = await blockchain.treasury('deployer');
+
+    proxy = blockchain.openContract(
+        Proxy.createFromConfig(
+            {
+                owner: deployer.address,
+            },
+            code
+        )
+    );
+
+    const deployResult = await proxy.sendDeploy(
+        deployer.getSender(),
+        toNano('0.01')
+    );
+
+    expect(deployResult.transactions).toHaveTransaction({
+        from: deployer.address,
+        to: proxy.address,
+        deploy: true,
+    });
+});
+```
+
+Теперь напишем первый тест для прокси контракта и разберем его код.
 
 ```ts
 it('should not forward from owner', async () => {
@@ -87,7 +121,7 @@ beginCell().storeAddress(user.address)
 Для проверки `value` используется необычная конструкция, давайте разберём её детальнее:
 
 ```ts
-value: (x) => (x ? toNano('0.99') <= x && x <= toNano('1') : false)
+value: (x) => (x ? toNano('0.99') <= x && x <= toNano('1') : false);
 ```
 
 "Мэтчеры" из `.toHaveTransaction` могут принимать как само значение, которое мы ожидаем, так и функцию, которая делает какую-то более сложную проверку и возвращает булевое значение с результатом этой проверки.
