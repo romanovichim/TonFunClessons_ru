@@ -148,7 +148,7 @@ Hashmap - это структура данных представленная д
     	throw (1001);
      }
 
-#op = 1
+# op = 1
 
 При `op` равному одному мы добавляем значение в hashmap. Соответственно по заданию нам надо:
 
@@ -197,9 +197,9 @@ Hashmap - это структура данных представленная д
     	return ();
     }
 
-#op = 2
+# op = 2
 
-Здесь наша задача удалить из своих данных все устаревшие записи (с `valid_until` < `now())`. Для того, чтобы "пройти" по hashmap будем использовать цикл. В FunC есть три [цикла](https://ton-blockchain.github.io/docs/#/func/statements?id=loops): `repeat`,`until`,`while`.
+Здесь наша задача удалить из своих данных все устаревшие записи (с `valid_until` < `now()`). Для того, чтобы "пройти" по hashmap будем использовать цикл. В FunC есть три [цикла](https://ton-blockchain.github.io/docs/#/func/statements?id=loops): `repeat`,`until`,`while`.
 
 Так как мы уже вычитали `op` и `query_id`, проверим здесь, что в слайсе in_msg_body ничего нет с помощью `end_parse()`
 
@@ -372,6 +372,89 @@ Hashmap - это структура данных представленная д
     	int valid_until = payload~load_uint(64);
     	return (valid_until, payload);
     }
+
+## Обёртка на TypeScript
+
+Для удобного взаимодействия с нашим смарт контрактом, напишем обёртку на TypeScript. База для неё уже предоставляется от Blueprint.
+
+### Конфиг данных контракта
+
+Откроем файл `wrappers/Hashmap.ts` (название файла может быть другим, смотря как вы создавали проект).
+Конфиг данных остаётся пустым, как и задумано.
+
+```ts
+export type HashmapConfig = {};
+
+export function hashmapConfigToCell(config: HashmapConfig): Cell {
+    return beginCell().endCell();
+}
+```
+
+Теперь перейдём к классу `Hashmap` чтобы добавить методы для вызова нужных нам операций.
+
+### Метод для вызова op = 1
+
+При вызове операции с кодом 1, в тело сообщения мы должны положить: op=1, query_id, ключ, valid_until и само значение. Назовём метод `sendSet`.
+
+```ts
+async sendSet(
+    provider: ContractProvider,
+    via: Sender,
+    value: bigint,
+    opts: {
+        queryId: bigint;
+        key: bigint;
+        value: Slice;
+        validUntil: bigint;
+    }
+) {
+    await provider.internal(via, {
+        value,
+        sendMode: SendMode.PAY_GAS_SEPARATELY,
+        body: beginCell()
+            .storeUint(1, 32)
+            .storeUint(opts.queryId, 64)
+            .storeUint(opts.key, 256)
+            .storeUint(opts.validUntil, 64)
+            .storeSlice(opts.value)
+            .endCell(),
+    });
+}
+```
+
+### Метод для вызова op = 2
+
+Эта операция не требует дополнительных данных кроме op=2 и query_id. Назовём метод `sendClearOldValues`.
+
+```ts
+async sendClearOldValues(
+    provider: ContractProvider,
+    via: Sender,
+    value: bigint,
+    opts: {
+        queryId: bigint;
+    }
+) {
+    await provider.internal(via, {
+        value,
+        sendMode: SendMode.PAY_GAS_SEPARATELY,
+        body: beginCell().storeUint(2, 32).storeUint(opts.queryId, 64).endCell(),
+    });
+}
+```
+
+### Метод для вызова геттера get_key
+
+Этот метод будет немного сложнее чем тот, что мы уже писали в одном из первых уроков, потому что здесь должно возвращаться сразу два значения. Такой тип в TypeScript можно задать как массив `[bigint, Slice]`. А `Promise<>` нужен потому что функция асинхронная (ключевое слово `async` перед её названием).
+
+Вызовем `provider.get` и стек результата положим в константу `result`. Затем оттуда мы можем читать полученные значения для возврата из функции. С первым значением всё просто - делаем `readBigNumber()` чтобы прочитать `bigint` (который в FunC был `int`). Но с вторым значением появляется проблема: в библиотеке не предусмотрен отдельный метод для считывания слайса (что-то вроде `readSlice()`). Поэтому придётся использовать `peek()` который считывает следующее значение, игнорируя его тип, и явно указать компилятору, что это `TupleItemSlice`, а затем получить из него само значение.
+
+```ts
+async getByKey(provider: ContractProvider, key: bigint): Promise<[bigint, Slice]> {
+    const result = (await provider.get('get_key', [{ type: 'int', value: key }])).stack;
+    return [result.readBigNumber(), (result.peek() as TupleItemSlice).cell.asSlice()];
+}
+```
 
 ## Заключение
 

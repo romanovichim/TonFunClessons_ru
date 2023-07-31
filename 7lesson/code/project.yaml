@@ -1,5 +1,0 @@
-contract:
-  data: fift/data.fif
-  func:
-    - func/code.func
-
