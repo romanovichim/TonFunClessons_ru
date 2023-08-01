@@ -11,23 +11,23 @@ import {
 } from 'ton-core';
 import { TupleItemSlice } from 'ton-core/dist/tuple/tuple';
 
-export type TestConfig = {};
+export type HashmapConfig = {};
 
-export function testConfigToCell(config: TestConfig): Cell {
+export function hashmapConfigToCell(config: HashmapConfig): Cell {
     return beginCell().endCell();
 }
 
-export class Test implements Contract {
+export class Hashmap implements Contract {
     constructor(readonly address: Address, readonly init?: { code: Cell; data: Cell }) {}
 
     static createFromAddress(address: Address) {
-        return new Test(address);
+        return new Hashmap(address);
     }
 
-    static createFromConfig(config: TestConfig, code: Cell, workchain = 0) {
-        const data = testConfigToCell(config);
+    static createFromConfig(config: HashmapConfig, code: Cell, workchain = 0) {
+        const data = hashmapConfigToCell(config);
         const init = { code, data };
-        return new Test(contractAddress(workchain, init), init);
+        return new Hashmap(contractAddress(workchain, init), init);
     }
 
     async sendDeploy(provider: ContractProvider, via: Sender, value: bigint) {

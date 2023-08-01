@@ -4,20 +4,20 @@ import {
     TreasuryContract,
 } from '@ton-community/sandbox';
 import { Address, Cell, beginCell, toNano } from 'ton-core';
-import { Counter } from '../wrappers/Test';
+import { Counter } from '../wrappers/Counter';
 import '@ton-community/test-utils';
 import { compile } from '@ton-community/blueprint';
 import { randomAddress } from '@ton-community/test-utils';
 
-describe('Test', () => {
+describe('Counter', () => {
     let code: Cell;
 
     beforeAll(async () => {
-        code = await compile('Test');
+        code = await compile('Counter');
     });
 
     let blockchain: Blockchain;
-    let counter: SandboxContract<Test>;
+    let counter: SandboxContract<Counter>;
 
     beforeEach(async () => {
         blockchain = await Blockchain.create();

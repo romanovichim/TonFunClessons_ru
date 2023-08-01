@@ -1,15 +1,15 @@
 import { Blockchain, SandboxContract, TreasuryContract } from '@ton-community/sandbox';
 import { Cell, beginCell, toNano } from 'ton-core';
-import { AddressSaver } from '../wrappers/Test';
+import { AddressSaver } from '../wrappers/AddressSaver';
 import '@ton-community/test-utils';
 import { compile } from '@ton-community/blueprint';
 import { randomAddress } from '@ton-community/test-utils';
 
-describe('Test', () => {
+describe('AddressSaver', () => {
     let code: Cell;
 
     beforeAll(async () => {
-        code = await compile('Test');
+        code = await compile('AddressSaver');
     });
 
     let blockchain: Blockchain;

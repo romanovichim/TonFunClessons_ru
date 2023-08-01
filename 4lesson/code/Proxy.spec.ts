@@ -4,15 +4,15 @@ import {
     TreasuryContract,
 } from '@ton-community/sandbox';
 import { Cell, beginCell, toNano } from 'ton-core';
-import { Proxy } from '../wrappers/Test';
+import { Proxy } from '../wrappers/Proxy';
 import '@ton-community/test-utils';
 import { compile } from '@ton-community/blueprint';
 
-describe('Test', () => {
+describe('Proxy', () => {
     let code: Cell;
 
     beforeAll(async () => {
-        code = await compile('Test');
+        code = await compile('Proxy');
     });
 
     let blockchain: Blockchain;
