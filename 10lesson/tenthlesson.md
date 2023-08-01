@@ -180,7 +180,7 @@ workchain() - это вспомогательная функция из `params.
 
 Для того, чтобы наша кошелек мог принимать сообщения будем использовать внешний метод `recv_internal()`
 
-    () recv_internal()  {
+    () recv_internal(int balance, int msg_value, cell in_msg_full, slice in_msg_body)  {
 
     }
 
@@ -191,28 +191,6 @@ workchain() - это вспомогательная функция из `params.
 -   деплой сразу нескольких NFT (batch deploy)
 -   изменение владельца
 -   а также большое количество исключений, проверяющих логику работы)
-
-##### Аргументы внешнего метода
-
-В соответствии с документацией [виртуальной машины TON - TVM](https://ton.org/tvm.pdf), когда на счете в одной из цепочек TON происходит какое-то событие, оно вызывает транзакцию.
-
-Каждая транзакция состоит из до 5 этапов. Подробнее [здесь](https://docs.ton.org/learn/tvm-instructions/tvm-overview#transactions-and-phases).
-
-Нас интересует **Compute phase**. А если быть конкретнее, что "в стеке" при инициализации. Для обычных транзакций, вызванных сообщением, начальное состояние стека выглядит следующим [образом](https://docs.ton.org/learn/tvm-instructions/tvm-initialization):
-
-5 элементов:
-
--   Баланс смарт-контракта (в наноТонах)
--   Баланс входящего сообщения (в наноТонах)
--   Ячейка с входящим сообщением
--   Тело входящего сообщения, тип слайс
--   Селектор функции (для recv_internal это 0)
-
-По итогу получаем следующий код:
-
-    () recv_internal(int balance, int msg_value, cell in_msg_full, slice in_msg_body)  {
-
-    }
 
 ##### Соберем каркас внешнего метода
 
@@ -755,21 +733,7 @@ throw_unless(402, rest_amount >= 0); ;; base nft spends fixed amount of gas, wil
 
 ##### Аргументы внешнего метода
 
-В соответствии с документацией [виртуальной машины TON - TVM](https://ton.org/tvm.pdf), когда на счете в одной из цепочек TON происходит какое-то событие, оно вызывает транзакцию.
-
-Каждая транзакция состоит из до 5 этапов. Подробнее [здесь](https://docs.ton.org/learn/tvm-instructions/tvm-overview#transactions-and-phases).
-
-Нас интересует **Compute phase**. А если быть конкретнее, что "в стеке" при инициализации. Для обычных транзакций, вызванных сообщением, начальное состояние стека выглядит следующим [образом](https://docs.ton.org/learn/tvm-instructions/tvm-initialization):
-
-5 элементов:
-
--   Баланс смарт-контракта (в наноТонах)
--   Баланс входящего сообщения (в наноТонах)
--   Ячейка с входящим сообщением
--   Тело входящего сообщения, тип слайс
--   Селектор функции (для recv_internal это 0)
-
-По итогу получаем следующий код:
+Так же как и в прошлый раз.
 
     () recv_internal(int balance, int msg_value, cell in_msg_full, slice in_msg_body)  {
 
@@ -779,9 +743,11 @@ throw_unless(402, rest_amount >= 0); ;; base nft spends fixed amount of gas, wil
 
 Итак первое, что мы сделаем в `recv_internal()` это проверим пустое ли сообщение:
 
+````func
 if (in_msg_body.slice_empty?()) { ;; ignore empty messages
-return ();
+    return ();
 }
+```
 
 Дальше мы начинаем разбирать(вычитывать) сообщение:
 
@@ -884,3 +850,4 @@ return ();
       (int init?, int index, slice collection_address, slice owner_address, cell content) = load_data();
       return (init?, index, collection_address, owner_address, content);
     }
+````
