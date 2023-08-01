@@ -135,8 +135,9 @@ value: (x) => (x ? toNano('0.99') <= x && x <= toNano('1') : false);
 ```
  PASS  tests/Proxy.spec.ts
   Proxy
-    ✓ should not forward from owner (147 ms)
-    ✓ should forward from another wallet (69 ms)
+    ✓ should deploy (145 ms)
+    ✓ should not forward from owner (63 ms)
+    ✓ should forward from another wallet (66 ms)
 ```
 
 Если какие то тесты у вас не прошли, просмотрите код и текст этого урока ещё раз. Также сверьте свой код смарт-контракта с кодом из предыдущего урока.

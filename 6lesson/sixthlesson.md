@@ -46,7 +46,12 @@
 ```ts
 it('should change saved address by manager', async () => {
     const address = randomAddress();
-    const result = await addressSaver.sendChangeAddress(deployer.getSender(), toNano('0.01'), 12345n, address);
+    const result = await addressSaver.sendChangeAddress(
+        deployer.getSender(),
+        toNano('0.01'),
+        12345n,
+        address
+    );
 
     expect(result.transactions).toHaveTransaction({
         from: deployer.address,
@@ -66,7 +71,12 @@ it('should change saved address by manager', async () => {
 it('should not change saved address by anyone else', async () => {
     let user = await blockchain.treasury('user');
     const address = randomAddress();
-    const result = await addressSaver.sendChangeAddress(user.getSender(), toNano('0.01'), 12345n, address);
+    const result = await addressSaver.sendChangeAddress(
+        user.getSender(),
+        toNano('0.01'),
+        12345n,
+        address
+    );
 
     expect(result.transactions).toHaveTransaction({
         from: user.address,
@@ -85,10 +95,19 @@ it('should not change saved address by anyone else', async () => {
 ```ts
 it('should return required data on `requestAddress` call', async () => {
     const address = randomAddress();
-    await addressSaver.sendChangeAddress(deployer.getSender(), toNano('0.01'), 12345n, address);
+    await addressSaver.sendChangeAddress(
+        deployer.getSender(),
+        toNano('0.01'),
+        12345n,
+        address
+    );
 
     let user = await blockchain.treasury('user');
-    const result = await addressSaver.sendRequestAddress(user.getSender(), toNano('0.01'), 12345n);
+    const result = await addressSaver.sendRequestAddress(
+        user.getSender(),
+        toNano('0.01'),
+        12345n
+    );
     expect(result.transactions).toHaveTransaction({
         from: addressSaver.address,
         to: user.address,
@@ -124,13 +143,15 @@ it('should throw on any other opcode', async () => {
 ```
 
 Запустим тесты командой `npx blueprint test` и мы должны увидеть следующее:
+
 ```bash
- PASS  tests/Hashmap.spec.ts
-  Hashmap
-    ✓ should change saved address by manager (155 ms)
-    ✓ should not change saved address by anyone else (70 ms)
-    ✓ should return required data on `requestAddress` call (86 ms)
-    ✓ should throw on any other opcode (58 ms)
+ PASS  tests/AddressSaver.spec.ts
+  AddressSaver
+    ✓ should deploy (145 ms)
+    ✓ should change saved address by manager (67 ms)
+    ✓ should not change saved address by anyone else (67 ms)
+    ✓ should return required data on `requestAddress` call (70 ms)
+    ✓ should throw on any other opcode (89 ms)
 ```
 
 Если какие то тесты у вас не прошли, просмотрите код и текст этого урока ещё раз. Также сверьте свой код смарт-контракта с кодом из предыдущего урока.
