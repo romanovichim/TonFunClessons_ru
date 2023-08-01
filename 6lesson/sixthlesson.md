@@ -125,8 +125,8 @@ it('should throw on any other opcode', async () => {
 
 Запустим тесты командой `npx blueprint test` и мы должны увидеть следующее:
 ```bash
- PASS  tests/Test.spec.ts
-  Test
+ PASS  tests/Hashmap.spec.ts
+  Hashmap
     ✓ should change saved address by manager (155 ms)
     ✓ should not change saved address by anyone else (70 ms)
     ✓ should return required data on `requestAddress` call (86 ms)
