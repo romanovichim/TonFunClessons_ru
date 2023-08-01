@@ -262,18 +262,21 @@ C помощью уже знакомым нам `store_` функциям буд
     send_raw_message(msg.end_cell(), 1); ;; pay transfer fees separately, revert on errors
 
 Итоговый код функции `mint_tokens() `:
+
+```func
 () mint_tokens(slice to_address, cell jetton_wallet_code, int amount, cell master_msg) impure {
-cell state_init = calculate_jetton_wallet_state_init(to_address, my_address(), jetton_wallet_code);
-slice to_wallet_address = calculate_jetton_wallet_address(state_init);
-var msg = begin_cell()
-.store_uint(0x18, 6)
-.store_slice(to_wallet_address)
-.store_coins(amount)
-.store_uint(4 + 2 + 1, 1 + 4 + 4 + 64 + 32 + 1 + 1 + 1)
-.store_ref(state_init)
-.store_ref(master_msg);
-send_raw_message(msg.end_cell(), 1); ;; pay transfer fees separately, revert on errors
+    cell state_init = calculate_jetton_wallet_state_init(to_address, my_address(), jetton_wallet_code);
+    slice to_wallet_address = calculate_jetton_wallet_address(state_init);
+    var msg = begin_cell()
+    .store_uint(0x18, 6)
+    .store_slice(to_wallet_address)
+    .store_coins(amount)
+    .store_uint(4 + 2 + 1, 1 + 4 + 4 + 64 + 32 + 1 + 1 + 1)
+    .store_ref(state_init)
+    .store_ref(master_msg);
+    send_raw_message(msg.end_cell(), 1); ;; pay transfer fees separately, revert on errors
 }
+```
 
 #### Разбираем recv_internal()
 
@@ -693,16 +696,18 @@ C помощью уже знакомым нам `load_` функциям выг�
 -   недостаточно TON для обработки операции, развертывания Жетон-кошелька получателя и отправки forward_ton_amount.
 -   После обработки запроса Жетон-кошелек получателя должен отправить не менее in_msg_value - forward_amount - 2 \* max_tx_gas_price на адрес response_destination.
 
-    int fwd*count = forward_ton_amount ? 2 : 1;
-    throw_unless(709, msg_value >
-    forward_ton_amount +
-    ;; 3 messages: wal1->wal2, wal2->owner, wal2->response
-    ;; but last one is optional (it is ok if it fails)
-    fwd_count * fwd*fee +
-    (2 * gas_consumption() + min_tons_for_storage()));
-    ;; universal message send fee calculation may be activated here
-    ;; by using this instead of fwd_fee
-    ;; msg_fwd_fee(to_wallet, msg_body, state_init, 15)
+```func
+int fwd*count = forward_ton_amount ? 2 : 1;
+throw_unless(709, msg_value >
+forward_ton_amount +
+;; 3 messages: wal1->wal2, wal2->owner, wal2->response
+;; but last one is optional (it is ok if it fails)
+fwd_count * fwd*fee +
+(2 * gas_consumption() + min_tons_for_storage()));
+;; universal message send fee calculation may be activated here
+;; by using this instead of fwd_fee
+;; msg_fwd_fee(to_wallet, msg_body, state_init, 15)
+```
 
 > Останавливаться подробно здесь не буду, так как комментарии и описание в стандарте токена дают подробную картину
 

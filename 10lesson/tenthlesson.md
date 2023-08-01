@@ -433,11 +433,13 @@ workchain() - это вспомогательная функция из `params.
 -   достаем из тела сообщения адрес нового владельца с помощью `load_msg_addr()`
 -   сохраняем данные в регистре `c4` с новым владельцем
 
-    if (op == 3) { ;; change owner
+```func
+if (op == 3) { ;; change owner
     slice new_owner = in_msg_body~load_msg_addr();
     save_data(new_owner, next_item_index, content, nft_item_code, royalty_params);
     return ();
-    }
+}
+```
 
 #### Get-методы
 
@@ -547,15 +549,17 @@ workchain() - это вспомогательная функция из `params.
 -   сначала выгрузим index, collection_address из `с4`
 -   а потом проверим с помощью функции `slice_bits()` количество битов в оставшихся `owner_address` и `cell content`
 
-    (int, int, slice, slice, cell) load_data() {
+```func
+(int, int, slice, slice, cell) load_data() {
     slice ds = get_data().begin_parse();
     var (index, collection_address) = (ds~load_uint(64), ds~load_msg_addr());
     if (ds.slice_bits() > 0) {
     return (-1, index, collection_address, ds~load_msg_addr(), ds~load_ref());
-    } else {  
+    } else {
      return (0, index, collection_address, null(), null()); ;; nft not initialized yet
     }
-    }
+}
+```
 
 #### Вспомогательная функция отправки сообщения send_msg()
 
@@ -743,7 +747,7 @@ throw_unless(402, rest_amount >= 0); ;; base nft spends fixed amount of gas, wil
 
 Итак первое, что мы сделаем в `recv_internal()` это проверим пустое ли сообщение:
 
-````func
+```func
 if (in_msg_body.slice_empty?()) { ;; ignore empty messages
     return ();
 }
@@ -754,10 +758,14 @@ if (in_msg_body.slice_empty?()) { ;; ignore empty messages
     slice cs = in_msg_full.begin_parse();
 
 Достаем флаги и проверяем что сообщение не было возвращенным (здесь имеется ввиду bounced).
+
+```func
 int flags = cs~load_uint(4);
 if (flags & 1) { ;; ignore all bounced messages
-return ();
+    return ();
 }
+```
+
 Теперь пропускаем значения, которые нам не нужны, что за значения можно посмотреть [здесь](https://docs.ton.org/develop/smart-contracts/messages#message-layout).
 
     cs~load_msg_addr(); ;; skip dst
@@ -850,4 +858,3 @@ return ();
       (int init?, int index, slice collection_address, slice owner_address, cell content) = load_data();
       return (init?, index, collection_address, owner_address, content);
     }
-````
