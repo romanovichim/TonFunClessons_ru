@@ -1,0 +1,21 @@
+#include "imports/stdlib.fc";
+
+() recv_internal(int my_balance, int msg_value, cell in_msg_full, slice in_msg_body) impure {
+    throw_if(35,in_msg_body.slice_bits() < 32);
+
+    int n = in_msg_body~load_uint(32);
+
+    slice ds = get_data().begin_parse();
+    int total = ds~load_uint(64);
+
+    total += n;
+
+    set_data(begin_cell().store_uint(total, 64).end_cell());
+}
+
+int get_total() method_id {
+    slice ds = get_data().begin_parse();
+    int total = ds~load_uint(64);
+
+    return total;
+}

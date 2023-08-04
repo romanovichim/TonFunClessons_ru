@@ -1,0 +1,306 @@
+export declare type AppMessage = ConnectRequest | AppRequest<keyof RpcRequests>;
+
+export declare type AppRequest<T extends RpcMethod> = RpcRequests[T];
+
+export declare const Base64: {
+    encode: typeof encode;
+    decode: typeof decode;
+};
+
+export declare enum CHAIN {
+    MAINNET = "-239",
+    TESTNET = "-3"
+}
+
+export declare function concatUint8Arrays(buffer1: Uint8Array, buffer2: Uint8Array): Uint8Array;
+
+export declare enum CONNECT_EVENT_ERROR_CODES {
+    UNKNOWN_ERROR = 0,
+    BAD_REQUEST_ERROR = 1,
+    MANIFEST_NOT_FOUND_ERROR = 2,
+    MANIFEST_CONTENT_ERROR = 3,
+    UNKNOWN_APP_ERROR = 100,
+    USER_REJECTS_ERROR = 300,
+    METHOD_NOT_SUPPORTED = 400
+}
+
+export declare enum CONNECT_ITEM_ERROR_CODES {
+    UNKNOWN_ERROR = 0,
+    METHOD_NOT_SUPPORTED = 400
+}
+
+export declare type ConnectEvent = ConnectEventSuccess | ConnectEventError;
+
+export declare interface ConnectEventError {
+    event: 'connect_error';
+    id: number;
+    payload: {
+        code: CONNECT_EVENT_ERROR_CODES;
+        message: string;
+    };
+}
+
+export declare interface ConnectEventSuccess {
+    event: 'connect';
+    id: number;
+    payload: {
+        items: ConnectItemReply[];
+        device: DeviceInfo;
+    };
+}
+
+export declare type ConnectItem = TonAddressItem | TonProofItem;
+
+export declare type ConnectItemReply = TonAddressItemReply | TonProofItemReply;
+
+export declare type ConnectItemReplyError<T> = {
+    name: T;
+    error: {
+        code: CONNECT_ITEM_ERROR_CODES;
+        message?: string;
+    };
+};
+
+export declare interface ConnectRequest {
+    manifestUrl: string;
+    items: ConnectItem[];
+}
+
+export declare function decode(value: string, urlSafe?: boolean): {
+    toString(): string;
+    toObject<T>(): T | null;
+    toUint8Array(): Uint8Array;
+};
+
+export declare interface DeviceInfo {
+    platform: 'iphone' | 'ipad' | 'android' | 'windows' | 'mac' | 'linux' | 'browser';
+    appName: string;
+    appVersion: string;
+    maxProtocolVersion: number;
+    features: Feature[];
+}
+
+export declare enum DISCONNECT_ERROR_CODES {
+    UNKNOWN_ERROR = 0,
+    BAD_REQUEST_ERROR = 1,
+    UNKNOWN_APP_ERROR = 100,
+    METHOD_NOT_SUPPORTED = 400
+}
+
+export declare interface DisconnectEvent {
+    event: 'disconnect';
+    id: number;
+    payload: {};
+}
+
+export declare interface DisconnectRpcRequest {
+    method: 'disconnect';
+    params: [];
+    id: string;
+}
+
+export declare type DisconnectRpcResponse = DisconnectRpcResponseSuccess | DisconnectRpcResponseError;
+
+export declare interface DisconnectRpcResponseError extends WalletResponseTemplateError {
+    error: {
+        code: DISCONNECT_ERROR_CODES;
+        message: string;
+        data?: unknown;
+    };
+    id: string;
+}
+
+export declare interface DisconnectRpcResponseSuccess {
+    id: string;
+    result: {};
+}
+
+export declare function encode(value: string | object | Uint8Array, urlSafe?: boolean): string;
+
+export declare type Feature = SendTransactionFeatureDeprecated | SendTransactionFeature | SignDataFeature;
+
+export declare function hexToByteArray(hexString: string): Uint8Array;
+
+export declare function isNode(): boolean;
+
+export declare interface KeyPair {
+    publicKey: string;
+    secretKey: string;
+}
+
+export declare type RpcMethod = 'disconnect' | 'sendTransaction' | 'signData';
+
+export declare type RpcRequests = {
+    sendTransaction: SendTransactionRpcRequest;
+    signData: SignDataRpcRequest;
+    disconnect: DisconnectRpcRequest;
+};
+
+export declare type RpcResponses = {
+    sendTransaction: {
+        error: SendTransactionRpcResponseError;
+        success: SendTransactionRpcResponseSuccess;
+    };
+    signData: {
+        error: SignDataRpcResponseError;
+        success: SignDataRpcResponseSuccess;
+    };
+    disconnect: {
+        error: DisconnectRpcResponseError;
+        success: DisconnectRpcResponseSuccess;
+    };
+};
+
+export declare enum SEND_TRANSACTION_ERROR_CODES {
+    UNKNOWN_ERROR = 0,
+    BAD_REQUEST_ERROR = 1,
+    UNKNOWN_APP_ERROR = 100,
+    USER_REJECTS_ERROR = 300,
+    METHOD_NOT_SUPPORTED = 400
+}
+
+export declare type SendTransactionFeature = {
+    name: 'SendTransaction';
+    maxMessages: number;
+};
+
+export declare type SendTransactionFeatureDeprecated = 'SendTransaction';
+
+export declare interface SendTransactionRpcRequest {
+    method: 'sendTransaction';
+    params: [string];
+    id: string;
+}
+
+export declare type SendTransactionRpcResponse = SendTransactionRpcResponseSuccess | SendTransactionRpcResponseError;
+
+export declare interface SendTransactionRpcResponseError extends WalletResponseTemplateError {
+    error: {
+        code: SEND_TRANSACTION_ERROR_CODES;
+        message: string;
+        data?: unknown;
+    };
+    id: string;
+}
+
+export declare interface SendTransactionRpcResponseSuccess extends WalletResponseTemplateSuccess {
+}
+
+export declare class SessionCrypto {
+    private readonly nonceLength;
+    private readonly keyPair;
+    readonly sessionId: string;
+    constructor(keyPair?: KeyPair);
+    private createKeypair;
+    private createKeypairFromString;
+    private createNonce;
+    encrypt(message: string, receiverPublicKey: Uint8Array): Uint8Array;
+    decrypt(message: Uint8Array, senderPublicKey: Uint8Array): string;
+    stringifyKeypair(): KeyPair;
+}
+
+export declare enum SIGN_DATA_ERROR_CODES {
+    UNKNOWN_ERROR = 0,
+    BAD_REQUEST_ERROR = 1,
+    UNKNOWN_APP_ERROR = 100,
+    USER_REJECTS_ERROR = 300,
+    METHOD_NOT_SUPPORTED = 400
+}
+
+export declare type SignDataFeature = {
+    name: 'SignData';
+};
+
+export declare interface SignDataRpcRequest {
+    method: 'signData';
+    params: [
+        {
+        schema_crc: number;
+        cell: string;
+    }
+    ];
+    id: string;
+}
+
+export declare type SignDataRpcResponse = SignDataRpcResponseSuccess | SignDataRpcResponseError;
+
+export declare interface SignDataRpcResponseError extends WalletResponseTemplateError {
+    error: {
+        code: SIGN_DATA_ERROR_CODES;
+        message: string;
+        data?: unknown;
+    };
+    id: string;
+}
+
+export declare interface SignDataRpcResponseSuccess {
+    id: string;
+    result: {
+        signature: string;
+        timestamp: string;
+    };
+}
+
+export declare function splitToUint8Arrays(array: Uint8Array, index: number): [Uint8Array, Uint8Array];
+
+export declare function toHexString(byteArray: Uint8Array): string;
+
+export declare interface TonAddressItem {
+    name: 'ton_addr';
+}
+
+export declare interface TonAddressItemReply {
+    name: 'ton_addr';
+    address: string;
+    network: CHAIN;
+    walletStateInit: string;
+    publicKey: string;
+}
+
+export declare interface TonProofItem {
+    name: 'ton_proof';
+    payload: string;
+}
+
+export declare type TonProofItemReply = TonProofItemReplySuccess | TonProofItemReplyError;
+
+export declare type TonProofItemReplyError = ConnectItemReplyError<TonProofItemReplySuccess['name']>;
+
+export declare interface TonProofItemReplySuccess {
+    name: 'ton_proof';
+    proof: {
+        timestamp: number;
+        domain: {
+            lengthBytes: number;
+            value: string;
+        };
+        payload: string;
+        signature: string;
+    };
+}
+
+export declare type WalletEvent = ConnectEvent | DisconnectEvent;
+
+export declare type WalletMessage = WalletEvent | WalletResponse<RpcMethod>;
+
+export declare type WalletResponse<T extends RpcMethod> = WalletResponseSuccess<T> | WalletResponseError<T>;
+
+export declare type WalletResponseError<T extends RpcMethod> = RpcResponses[T]['error'];
+
+export declare type WalletResponseSuccess<T extends RpcMethod> = RpcResponses[T]['success'];
+
+export declare interface WalletResponseTemplateError {
+    error: {
+        code: number;
+        message: string;
+        data?: unknown;
+    };
+    id: string;
+}
+
+export declare interface WalletResponseTemplateSuccess {
+    result: string;
+    id: string;
+}
+
+export { }
