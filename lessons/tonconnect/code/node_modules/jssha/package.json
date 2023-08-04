@@ -1,0 +1,178 @@
+{
+  "name": "jssha",
+  "version": "3.2.0",
+  "description": "jsSHA implements the complete Secure Hash Standard (SHA) family (SHA-1, SHA-224/256/384/512, SHA3-224/256/384/512, SHAKE128/256, cSHAKE128/256, and KMAC128/256) with HMAC",
+  "main": "./dist/sha.js",
+  "exports": {
+    ".": {
+      "import": "./dist/sha.mjs",
+      "require": "./dist/sha.js"
+    },
+    "./sha1": {
+      "import": "./dist/sha1.mjs",
+      "require": "./dist/sha1.js"
+    },
+    "./dist/sha1": {
+      "import": "./dist/sha1.mjs",
+      "require": "./dist/sha1.js"
+    },
+    "./sha256": {
+      "import": "./dist/sha256.mjs",
+      "require": "./dist/sha256.js"
+    },
+    "./dist/sha256": {
+      "import": "./dist/sha256.mjs",
+      "require": "./dist/sha256.js"
+    },
+    "./sha512": {
+      "import": "./dist/sha512.mjs",
+      "require": "./dist/sha512.js"
+    },
+    "./dist/sha512": {
+      "import": "./dist/sha512.mjs",
+      "require": "./dist/sha512.js"
+    },
+    "./sha3": {
+      "import": "./dist/sha3.mjs",
+      "require": "./dist/sha3.js"
+    },
+    "./dist/sha3": {
+      "import": "./dist/sha3.mjs",
+      "require": "./dist/sha3.js"
+    },
+    "./package.json": "./package.json"
+  },
+  "module": "./dist/sha.mjs",
+  "types": "./dist/sha.d.ts",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Caligatio/jsSHA.git"
+  },
+  "keywords": [
+    "SHA-1",
+    "SHA-224",
+    "SHA3-224",
+    "SHA-256",
+    "SHA3-256",
+    "SHA-384",
+    "SHA3-384",
+    "SHA-512",
+    "SHA3-512",
+    "SHAKE-128",
+    "SHAKE-256",
+    "SHAKE128",
+    "SHAKE256",
+    "cSHAKE128",
+    "cSHAKE256",
+    "KMAC128",
+    "KMAC256",
+    "SHA1",
+    "SHA224",
+    "SHA256",
+    "SHA384",
+    "SHA512",
+    "SHA-2",
+    "SHA2",
+    "SHA-3",
+    "SHA3",
+    "SHAKE",
+    "cSHAKE",
+    "cSHAKE-128",
+    "cSHAKE-256",
+    "HMAC",
+    "KMAC",
+    "KMAC-128",
+    "KMAC-256",
+    "hash",
+    "cryptography"
+  ],
+  "license": "BSD-3-Clause",
+  "author": "Brian Turek <brian.turek@gmail.com>",
+  "bugs": {
+    "url": "https://github.com/Caligatio/jsSHA/issues"
+  },
+  "engines": {
+    "node": "*"
+  },
+  "homepage": "https://github.com/Caligatio/jsSHA",
+  "dependencies": {},
+  "devDependencies": {
+    "@rollup/plugin-typescript": "^5.0.2",
+    "@types/chai": "^4.2.12",
+    "@types/mocha": "^8.0.2",
+    "@types/rewire": "^2.5.28",
+    "@types/sinon": "^9.0.4",
+    "@typescript-eslint/eslint-plugin": "^3.9.0",
+    "@typescript-eslint/parser": "^3.9.0",
+    "chai": "^4.2.0",
+    "coveralls": "^3.1.0",
+    "eslint": "^7.6.0",
+    "husky": "^4.2.5",
+    "karma": "^5.1.1",
+    "karma-chai": "^0.1.0",
+    "karma-chrome-launcher": "^3.1.0",
+    "karma-firefox-launcher": "^1.3.0",
+    "karma-mocha": "^2.0.1",
+    "lint-staged": "^10.2.11",
+    "mocha": "^8.1.1",
+    "nyc": "^15.1.0",
+    "prettier": "^2.0.5",
+    "rewire": "^5.0.0",
+    "rollup": "^2.25.0",
+    "rollup-plugin-dts": "^1.4.10",
+    "rollup-plugin-terser": "^7.0.0",
+    "sinon": "^9.0.3",
+    "ts-node": "^8.10.2",
+    "tslib": "^2.0.1",
+    "typescript": "^3.9.7"
+  },
+  "scripts": {
+    "build": "rollup -c",
+    "test": "nyc --reporter=html --reporter=text mocha test/src/*.ts",
+    "test_dist": "mocha test/dist/ && karma start karma.conf.js --file-variant sha && karma start karma.conf.js --file-variant sha1 && karma start karma.conf.js --file-variant sha256 && karma start karma.conf.js --file-variant sha512 && karma start karma.conf.js --file-variant sha3",
+    "coverage": "nyc report --reporter=text-lcov | coveralls"
+  },
+  "mocha": {
+    "require": [
+      "ts-node/register"
+    ],
+    "timeout": 10000
+  },
+  "nyc": {
+    "require": [
+      "ts-node/register"
+    ],
+    "exclude": [
+      "dist",
+      "*.js",
+      "coverage",
+      "test"
+    ],
+    "reporter": [
+      "text",
+      "html"
+    ],
+    "all": true
+  },
+  "prettier": {
+    "printWidth": 120,
+    "proseWrap": "always",
+    "overrides": [
+      {
+        "files": "*.md",
+        "options": {
+          "printWidth": 80
+        }
+      }
+    ]
+  },
+  "husky": {
+    "hooks": {
+      "pre-commit": "lint-staged"
+    }
+  },
+  "lint-staged": {
+    "*.{js,ts}": "eslint --cache --fix",
+    "*.{js,ts,css,md,html,json}": "prettier --write"
+  }
+}

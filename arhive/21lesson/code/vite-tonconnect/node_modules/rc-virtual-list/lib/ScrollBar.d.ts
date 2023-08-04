@@ -1,0 +1,42 @@
+import * as React from 'react';
+export interface ScrollBarProps {
+    prefixCls: string;
+    scrollTop: number;
+    scrollHeight: number;
+    height: number;
+    count: number;
+    onScroll: (scrollTop: number) => void;
+    onStartMove: () => void;
+    onStopMove: () => void;
+}
+interface ScrollBarState {
+    dragging: boolean;
+    pageY: number;
+    startTop: number;
+    visible: boolean;
+}
+export default class ScrollBar extends React.Component<ScrollBarProps, ScrollBarState> {
+    moveRaf: number;
+    scrollbarRef: React.RefObject<HTMLDivElement>;
+    thumbRef: React.RefObject<HTMLDivElement>;
+    visibleTimeout: ReturnType<typeof setTimeout>;
+    state: ScrollBarState;
+    componentDidMount(): void;
+    componentDidUpdate(prevProps: ScrollBarProps): void;
+    componentWillUnmount(): void;
+    delayHidden: () => void;
+    onScrollbarTouchStart: (e: TouchEvent) => void;
+    onContainerMouseDown: React.MouseEventHandler;
+    patchEvents: () => void;
+    removeEvents: () => void;
+    onMouseDown: (e: React.MouseEvent | TouchEvent) => void;
+    onMouseMove: (e: MouseEvent | TouchEvent) => void;
+    onMouseUp: () => void;
+    getSpinHeight: () => number;
+    getEnableScrollRange: () => number;
+    getEnableHeightRange: () => number;
+    getTop: () => number;
+    showScroll: () => boolean;
+    render(): JSX.Element;
+}
+export {};
