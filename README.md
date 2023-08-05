@@ -37,9 +37,9 @@
 | Урок | Рассмотренные концепции  | Ссылка | 
 | ------------- | ------------- | ------------- | 
 | ton.js | Получаем данные из смарт-контракта с помощью JS(ton.js)  | [LINK](./lessons/requests/20lesson/tonjs.md) | 
-| ADNL Protocol Intro |   | [LINK]() | 
-| ADNL Run GetMethod |   | [LINK]() | 
-| Collect account txes using ADNL |   | [LINK]() | 
+| ADNL Protocol Intro | Connection to ADNL, getAccountState, getMasterchaininfo  | [LINK](./lessons/requests/ADNL/adnlintro.md) | 
+| ADNL Run GetMethod | Вызов Гетметода, логика аналитики продаж НФТ  | [LINK](./lessons/requests/ADNL/adnlgetsale.md) | 
+| Collect account txes using ADNL | Logical time, последние транзакции аккаунта  | [LINK](./lessons/requests/ADNL/adnltxes.md) | 
 
 # Авторизация и отправка транзакций с UI за 5 минут c TON Connect React UI
 
