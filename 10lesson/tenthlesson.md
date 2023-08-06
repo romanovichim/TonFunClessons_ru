@@ -6,7 +6,7 @@
 
 Итак, невзаимозаменяемые токены - это активы, каждый экземпляр которого уникален (специфичен) и не может быть замещён другим аналогичным активом. Невзаимозаменяемый токен представляет собой некоторый сертификат цифрового объекта с возможностью передавать сертификат через некоторый механизм.
 
-[Стандарт NFT в TON](https://github.com/ton-blockchain/TIPs/issues/62) описывает:
+[Стандарт NFT в TON](https://github.com/ton-blockchain/TEPs/blob/master/text/0062-nft-standard.md) описывает:
 
 -   Изменение формы собственности.
 -   Способ объединения предметов в коллекции.
@@ -18,9 +18,9 @@
 
 > В стандарте NFT также объясняется почему выбрана именно такая схема реализации NFT, с таким количеством контрактов, пункт - Rationale и следующий за ним.
 
-В TON для [стандарта NFT](https://github.com/ton-blockchain/TIPs/issues/62) есть расширения(на 29.07.2022 часть из них в Драфтах):
+В TON для [стандарта NFT](https://github.com/ton-blockchain/TEPs/blob/master/text/0062-nft-standard.md) есть расширения(на 29.07.2022 часть из них в Драфтах):
 
--   [NFTRoyalty](https://github.com/ton-blockchain/TIPs/issues/66) - о способе получения информации о выплате роялти и обеспечении универсальную поддержку выплат роялти на всех торговых площадках NFT и участниках экосистемы.
+-   [NFTRoyalty](https://github.com/ton-blockchain/TEPs/blob/master/text/0066-nft-royalty-standard.md) - о способе получения информации о выплате роялти и обеспечении универсальную поддержку выплат роялти на всех торговых площадках NFT и участниках экосистемы.
 -   [NFTBounceable](https://github.com/ton-blockchain/TIPs/issues/67) - о способ отката NFT-переводов, если получатель отклонил уведомление. (Например, если NFT был отправлен не на тот адрес, а смарт-контракт получателя не знает, как взаимодействовать с NFT.)
 -   [NFTEditable](https://github.com/ton-blockchain/TIPs/issues/68) - об массовых изменениях NFT
 -   [NFTUpgradable](https://github.com/ton-blockchain/TIPs/issues/69) - об изменяемых NFT
@@ -76,7 +76,7 @@
 
 -   `owner_address` - адрес владельца коллекции, если владельца нет, то нулевой адрес
 -   `next_item_index` - количество развернутых в настоящее время элементов NFT в коллекции\*.
--   `content` - содержимое коллекции в формате, соответствующем стандарту [токена](https://github.com/ton-blockchain/TIPs/issues/64).
+-   `content` - содержимое коллекции в формате, соответствующем стандарту [токена](https://github.com/ton-blockchain/TEPs/blob/master/text/0064-token-data-standard.md).
 -   `nft_item_code` - код отдельной NFT, будет использоваться для "воспроизведения" адреса смарт-контракта.
 -   `royalty_params` - параметры роялти
 
@@ -445,7 +445,7 @@ if (op == 3) { ;; change owner
 
 В нашем примере есть четыре Get-метода:
 
--   get_collection_data() - возвращает информацию о коллекции(адрес владельца, метаданные по [стандарту Токена](https://github.com/ton-blockchain/TIPs/issues/64) о коллекции, и счетчик индексов NFT)
+-   get_collection_data() - возвращает информацию о коллекции(адрес владельца, метаданные по [стандарту Токена](https://github.com/ton-blockchain/TEPs/blob/master/text/0064-token-data-standard.md) о коллекции, и счетчик индексов NFT)
 -   get_nft_address_by_index(int index) - по индексу воспроизводит смарт-контракт NFT
 -   royalty_params() - возвращает параметры роялти
 -   get_nft_content(int index, cell individual_nft_content) - возвращает информацию по конкретной NFT в коллекции
@@ -476,7 +476,7 @@ if (op == 3) { ;; change owner
 
 ##### royalty_params()
 
-Возвращаем параметры роялти. Данная функция относиться к расширению стандарта NFT, а именно [NFTRoyalty](https://github.com/ton-blockchain/TIPs/issues/66).
+Возвращаем параметры роялти. Данная функция относиться к расширению стандарта NFT, а именно [NFTRoyalty](https://github.com/ton-blockchain/TEPs/blob/master/text/0066-nft-royalty-standard.md).
 `royalty_params()` возвращает числитель, знаменатель и адрес для отправки роялти. Доля роялти — это числитель/знаменатель. Например, если числитель = 11, а знаменатель = 1000, то доля роялти составляет 11/1000 \* 100% = 1,1%. Числитель должен быть меньше знаменателя.
 
     (int, int, slice) royalty_params() method_id {
@@ -487,7 +487,7 @@ if (op == 3) { ;; change owner
 
 ##### get_nft_content()
 
-Получает серийный номер элемента NFT этой коллекции и индивидуальное содержимое этого элемента NFT и возвращает полное содержимое элемента NFT в формате, соответствующем [стандарту TIP-64](https://github.com/ton-blockchain/TIPs/issues/64).
+Получает серийный номер элемента NFT этой коллекции и индивидуальное содержимое этого элемента NFT и возвращает полное содержимое элемента NFT в формате, соответствующем [стандарту TEP-64](https://github.com/ton-blockchain/TEPs/blob/master/text/0064-token-data-standard.md).
 
 Здесь важно отметить, как возвращается контент:
 
@@ -497,7 +497,7 @@ if (op == 3) { ;; change owner
     					  .store_ref(individual_nft_content)
     		  .end_cell());
 
-`store_uint(1, 8) ` - подобный тэг означает что данные хранятся не в сети, про тэги хранения данных можно почитать в стандарте токена - [Content representation](https://github.com/ton-blockchain/TIPs/issues/64).
+`store_uint(1, 8) ` - подобный тэг означает что данные хранятся не в сети, про тэги хранения данных можно почитать в стандарте токена - [Content representation](https://github.com/ton-blockchain/TEPs/blob/master/text/0064-token-data-standard.md).
 
 Полный код функции:
 
@@ -520,7 +520,7 @@ if (op == 3) { ;; change owner
 -   `index` - индекс этой отдельной NFT
 -   `collection_address` - адрес смарт-контракта коллекции, к которой принадлежит этот NFT.
 -   `owner_address` - адрес текущего владельца этого NFT
--   `content` - контент, если у NFT есть коллекция - индивидуальный контент NFT в любом формате, если у NFT нет коллекции - содержимое NFT в формате, соответствующем стандарту TIP-64.
+-   `content` - контент, если у NFT есть коллекция - индивидуальный контент NFT в любом формате, если у NFT нет коллекции - содержимое NFT в формате, соответствующем стандарту TEP-64.
 
 > Может возникнуть вопрос, а что передавать в `collection_address` и `index`, если нет коллекции, в `collection_address` передадим addr_none, в `index` передадим произвольное, но постоянное значение.
 
@@ -609,7 +609,7 @@ if (op == 3) { ;; change owner
 
 Чтобы осуществить передачу владением NFT, ключевое, что необходимо:
 
--   проверить различные условия из [стандарта](https://github.com/ton-blockchain/TIPs/issues/62)
+-   проверить различные условия из [стандарта](https://github.com/ton-blockchain/TEPs/blob/master/text/0062-nft-standard.md)
 -   отправить сообщение новому владельцу, что право собственности назначено
 -   отправить излишек TON обратно, либо на указанный адрес (обратно здесь написано для простоты понимания)
 -   сохранить нового владельца в контракте
@@ -850,7 +850,7 @@ if (flags & 1) { ;; ignore all bounced messages
 
 #### Get-метод get_nft_data()
 
-У смарт-контракта отдельной NFT по [стандарту](https://github.com/ton-blockchain/TIPs/issues/62) должен быть один обязательный Get-метод.
+У смарт-контракта отдельной NFT по [стандарту](https://github.com/ton-blockchain/TEPs/blob/master/text/0062-nft-standard.md) должен быть один обязательный Get-метод.
 
 Этот метод просто возвращает данные об этой отдельной NFT, а именно выгружает данные из `c4`:
 
