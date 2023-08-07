@@ -24,9 +24,9 @@
 
 | Урок | Рассмотренные концепции  | Ссылка | 
 | ------------- | ------------- | ------------- | 
-| Простой контракт в ton-community/sandbox |  | [LINK]()  | 
-| Пишем тесты в ton-community/sandbox |   |  [LINK]() | 
-| Деплоим смарт-контракт используя QR-код |   |  [LINK]() | 
+| Простой контракт в ton-community/sandbox | создаем ton-community/sandbox проект, пишем и компилируем контракт | [LINK](./lessons/pipeline/simplesmartcontract.md)  | 
+| Пишем тесты в ton-community/sandbox | тесты на фреймворке jest  |  [LINK](./lessons/pipeline/simpletest.md) | 
+| Деплоим смарт-контракт используя QR-код | паплайн деплоя смарт-контракта в тестовую сеть |  [LINK](./lessons/pipeline/simpledeploy.md) | 
 | Чат-бот смарт-контракт |   | [LINK]()  | 
 | Пишем onchain тесты в тестовой сети |   | [LINK]()  |  
 
