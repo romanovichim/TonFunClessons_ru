@@ -1,0 +1,33 @@
+#include "imports/stdlib.fc";
+
+() recv_internal(int msg_value, cell in_msg, slice in_msg_body) impure {
+  ;; if you send over 0.0069 TON to this contract, it will reply you "doge"!
+
+  ;; ignore the sender if they send in less than 0.0069 TON
+  ;; because this smart contract needs to pay for the gas fee
+  ;; to send the reply message
+  if (msg_value < 10000000) { ;; 6900000 nanoton == 0.0069 TON
+    return ();
+  }
+
+  ;; parse the in_msg cell to get the info we want
+  slice cs = in_msg.begin_parse(); ;; turn in_msg into a slice
+  int flags = cs~load_uint(4); ;; load the flags. we don't need this tho
+  slice sender_address = cs~load_msg_addr(); ;; load the sender address
+
+  slice msg_text = "reply"; ;; "doge" will be our reply comment
+
+  ;; build the message cell that we want this contract to send back
+  ;; see https://ton.org/docs/develop/smart-contracts/messages
+  cell msg = begin_cell()
+      .store_uint(0x18, 6)
+      .store_slice(sender_address) ;; reply back to the original sender
+      .store_coins(100) ;; send 69 nanoton so it's not a zero-value transaction which wallets may ignore 
+      .store_uint(0, 1 + 4 + 4 + 64 + 32 + 1 + 1)
+      .store_uint(0, 32) ;; call op == 0 because we are not calling an op
+      .store_slice(msg_text) ;; store "doge" as a comment
+  .end_cell();
+
+  ;; send the message https://ton.org/docs/develop/func/stdlib/#send_raw_message
+  send_raw_message(msg, 3); ;; i was told that mode 64 is a better practice now, so (msg, 64)
+}

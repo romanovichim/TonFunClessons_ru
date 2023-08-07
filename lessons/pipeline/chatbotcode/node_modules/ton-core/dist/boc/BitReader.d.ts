@@ -1,0 +1,232 @@
+/**
+ * Copyright (c) Whales Corp.
+ * All Rights Reserved.
+ *
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the root directory of this source tree.
+ */
+/// <reference types="node" />
+import { Address } from "../address/Address";
+import { ExternalAddress } from "../address/ExternalAddress";
+import { BitString } from "./BitString";
+/**
+ * Class for reading bit strings
+ */
+export declare class BitReader {
+    private _bits;
+    private _offset;
+    private _checkpoints;
+    constructor(bits: BitString, offset?: number);
+    /**
+     * Offset in source bit string
+     */
+    get offset(): number;
+    /**
+     * Number of bits remaining
+     */
+    get remaining(): number;
+    /**
+     * Skip bits
+     * @param bits number of bits to skip
+     */
+    skip(bits: number): void;
+    /**
+     * Reset to the beginning or latest checkpoint
+     */
+    reset(): void;
+    /**
+     * Save checkpoint
+     */
+    save(): void;
+    /**
+     * Load a single bit
+     * @returns true if the bit is set, false otherwise
+     */
+    loadBit(): boolean;
+    /**
+     * Preload bit
+     * @returns true if the bit is set, false otherwise
+     */
+    preloadBit(): boolean;
+    /**
+     * Load bit string
+     * @param bits number of bits to read
+     * @returns new bitstring
+     */
+    loadBits(bits: number): BitString;
+    /**
+     * Preload bit string
+     * @param bits number of bits to read
+     * @returns new bitstring
+     */
+    preloadBits(bits: number): BitString;
+    /**
+     * Load buffer
+     * @param bytes number of bytes
+     * @returns new buffer
+     */
+    loadBuffer(bytes: number): Buffer;
+    /**
+     * Preload buffer
+     * @param bytes number of bytes
+     * @returns new buffer
+     */
+    preloadBuffer(bytes: number): Buffer;
+    /**
+     * Load uint value
+     * @param bits uint bits
+     * @returns read value as number
+     */
+    loadUint(bits: number): number;
+    /**
+     * Load uint value as bigint
+     * @param bits uint bits
+     * @returns read value as bigint
+     */
+    loadUintBig(bits: number): bigint;
+    /**
+     * Preload uint value
+     * @param bits uint bits
+     * @returns read value as number
+     */
+    preloadUint(bits: number): number;
+    /**
+     * Preload uint value as bigint
+     * @param bits uint bits
+     * @returns read value as bigint
+     */
+    preloadUintBig(bits: number): bigint;
+    /**
+     * Load int value
+     * @param bits int bits
+     * @returns read value as bigint
+     */
+    loadInt(bits: number): number;
+    /**
+     * Load int value as bigint
+     * @param bits int bits
+     * @returns read value as bigint
+     */
+    loadIntBig(bits: number): bigint;
+    /**
+     * Preload int value
+     * @param bits int bits
+     * @returns read value as bigint
+     */
+    preloadInt(bits: number): number;
+    /**
+     * Preload int value
+     * @param bits int bits
+     * @returns read value as bigint
+     */
+    preloadIntBig(bits: number): bigint;
+    /**
+     * Load varuint value
+     * @param bits number of bits to read the size
+     * @returns read value as bigint
+     */
+    loadVarUint(bits: number): number;
+    /**
+     * Load varuint value
+     * @param bits number of bits to read the size
+     * @returns read value as bigint
+     */
+    loadVarUintBig(bits: number): bigint;
+    /**
+     * Preload varuint value
+     * @param bits number of bits to read the size
+     * @returns read value as bigint
+     */
+    preloadVarUint(bits: number): number;
+    /**
+     * Preload varuint value
+     * @param bits number of bits to read the size
+     * @returns read value as bigint
+     */
+    preloadVarUintBig(bits: number): bigint;
+    /**
+     * Load varint value
+     * @param bits number of bits to read the size
+     * @returns read value as bigint
+     */
+    loadVarInt(bits: number): number;
+    /**
+     * Load varint value
+     * @param bits number of bits to read the size
+     * @returns read value as bigint
+     */
+    loadVarIntBig(bits: number): bigint;
+    /**
+     * Preload varint value
+     * @param bits number of bits to read the size
+     * @returns read value as bigint
+     */
+    preloadVarInt(bits: number): number;
+    /**
+     * Preload varint value
+     * @param bits number of bits to read the size
+     * @returns read value as bigint
+     */
+    preloadVarIntBig(bits: number): bigint;
+    /**
+     * Load coins value
+     * @returns read value as bigint
+     */
+    loadCoins(): bigint;
+    /**
+     * Preload coins value
+     * @returns read value as bigint
+     */
+    preloadCoins(): bigint;
+    /**
+     * Load Address
+     * @returns Address
+     */
+    loadAddress(): Address;
+    /**
+     * Load internal address
+     * @returns Address or null
+     */
+    loadMaybeAddress(): Address | null;
+    /**
+     * Load external address
+     * @returns ExternalAddress
+     */
+    loadExternalAddress(): ExternalAddress;
+    /**
+     * Load external address
+     * @returns ExternalAddress or null
+     */
+    loadMaybeExternalAddress(): ExternalAddress | null;
+    /**
+     * Read address of any type
+     * @returns Address or ExternalAddress or null
+     */
+    loadAddressAny(): Address | ExternalAddress | null;
+    /**
+     * Load bit string that was padded to make it byte alligned. Used in BOC serialization
+     * @param bytes number of bytes to read
+     */
+    loadPaddedBits(bits: number): BitString;
+    /**
+     * Clone BitReader
+     */
+    clone(): BitReader;
+    /**
+     * Preload int from specific offset
+     * @param bits bits to preload
+     * @param offset offset to start from
+     * @returns read value as bigint
+     */
+    private _preloadInt;
+    /**
+     * Preload uint from specific offset
+     * @param bits bits to preload
+     * @param offset offset to start from
+     * @returns read value as bigint
+     */
+    private _preloadUint;
+    private _preloadBuffer;
+    private _loadInternalAddress;
+    private _loadExternalAddress;
+}
