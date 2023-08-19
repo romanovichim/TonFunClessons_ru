@@ -239,4 +239,4 @@
 
 ## Conclusion
 
-Следующим шагом мы будем писать тесты к выполнению смарт-контракта, спасибо за внимание.
+Следующим шагом мы будем писать [тесты](https://github.com/romanovichim/TonFunClessons_ru/blob/main/lessons/pipeline/simpletest.md) к смарт-контракту, спасибо за внимание.
