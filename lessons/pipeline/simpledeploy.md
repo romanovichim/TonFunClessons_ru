@@ -82,30 +82,30 @@ deployContract()
 Выше мы сказали, что получить адрес можно из исходных данных, сделаем это с помощью `contractAddress`:
 
 ```ts
-	import { Cell, StateInit, beginCell, contractAddress, storeStateInit, toNano } from "ton-core";
-	import { hex } from "../build/main.compiled.json";
+import { Cell, StateInit, beginCell, contractAddress, storeStateInit, toNano } from "ton-core";
+import { hex } from "../build/main.compiled.json";
 
-	async function deployContract() {
-		const codeCell = Cell.fromBoc(Buffer.from(hex,"hex"))[0];
-		const dataCell = new Cell();   
+async function deployContract() {
+	const codeCell = Cell.fromBoc(Buffer.from(hex,"hex"))[0];
+	const dataCell = new Cell();   
 
-		const stateInit: StateInit = {
-			code: codeCell,
-			data: dataCell,
-		};
+	const stateInit: StateInit = {
+		code: codeCell,
+		data: dataCell,
+	};
 
-		const stateInitBuilder = beginCell();
-		storeStateInit(stateInit)(stateInitBuilder);
-		const stateInitCell = stateInitBuilder.endCell();
+	const stateInitBuilder = beginCell();
+	storeStateInit(stateInit)(stateInitBuilder);
+	const stateInitCell = stateInitBuilder.endCell();
 
-		const address = contractAddress(0, {
-			code: codeCell,
-			data: dataCell,
-		});
+	const address = contractAddress(0, {
+		code: codeCell,
+		data: dataCell,
+	});
 
-	}
+}
 
-	deployContract()
+deployContract()
 ```
 
 ### QR код
@@ -216,7 +216,7 @@ async function deployContract() {
 
 	}
 
-	deployContract()
+deployContract()
  ```
 
 Обновите файл `package.json`, добавив `"deploy": "yarn compile && ts-node ./scripts/deploy.ts"` в скрипты:
