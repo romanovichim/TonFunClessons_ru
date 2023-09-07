@@ -22,15 +22,17 @@ TON представляет собой [модель актора](https://en.w
 
 Первое, что надо сделать, это [импортировать стандартную библиотеку](https://ton-blockchain.github.io/docs/#/func/stdlib). Библиотека представляет собой просто оболочку для наиболее распространенных команд TVM (виртуальной машины TON), которые не являются встроенными.
 
-	#include "imports/stdlib.fc";
+```func
+#include "imports/stdlib.fc";
+```
 
 Для обработки внутренних сообщений, нам понадобиться метод`recv_internal()`
 
+```func
+() recv_internal()  {
 
-    () recv_internal()  {
-
-    }
-	
+}
+```	
 	
 ##### Аргументы внешнего метода
 Здесь возникает логичный вопрос - как понять какие аргументы должны быть у фукнции, чтобы она могла принимать сообщения в сети TON?
@@ -48,30 +50,34 @@ TON представляет собой [модель актора](https://en.w
 - Тело входящего сообщения, тип слайс
 - Селектор функции (для recv_internal это 0)
 
-    () recv_internal(int balance, int msg_value, cell in_msg_full, slice in_msg_body)  {
+```func
+() recv_internal(int balance, int msg_value, cell in_msg_full, slice in_msg_body)  {
 
-    }
+}
+```
 	
 Но необъязательно прописывать все аргументы `recv_internal()`. Устанавливая аргументы в `recv_internal()`, мы сообщаем коду смарт-контракта о некоторых из них. Те аргументы, о которых код не будет знать, будут просто лежать на дне стека, так и не тронутые. Для нашего  смарт-контракта это:
 
+```func
 	() recv_internal(int msg_value, cell in_msg, slice in_msg_body) impure {
 
 	}
-
+```
 ##### Газ для обработки сообщений
 
 Нашему смарт-контракту нужно будет использовать газ для дальнейшей отправки сообщения, поэтому будем проверять с каким msg_value пришло сообщение, если оно очень маленькое ( меньше 0.01 TON) закончим выполнение смарт-контракта с помощью `return()`.
 
-	#include "imports/stdlib.fc";
+```func
+#include "imports/stdlib.fc";
 
-	() recv_internal(int msg_value, cell in_msg, slice in_msg_body) impure {
+() recv_internal(int msg_value, cell in_msg, slice in_msg_body) impure {
 
-	  if (msg_value < 10000000) { ;; 10000000 nanoton == 0.01 TON
-		return ();
-	  }
-	  
-
-	}
+  if (msg_value < 10000000) { ;; 10000000 nanoton == 0.01 TON
+	return ();
+  }
+  
+}
+```
 
 ##### Достаем адрес
 
@@ -79,33 +85,41 @@ TON представляет собой [модель актора](https://en.w
 
 Чтобы мы могли взять адрес, нам необходимо преобразовать ячейку в слайс c помощью `begin_parse`:
 
-	var cs = in_msg_full.begin_parse();
+```func
+var cs = in_msg_full.begin_parse();
+```
 
 Теперь нам надо "вычитать" до адреса полученный slice. С помощью `load_uint` функции из [стандартной бибилотеки FunC ](https://ton-blockchain.github.io/docs/#/func/stdlib) она загружает целое число n-бит без знака из слайса, "вычитаем" флаги.
 
-	var flags = cs~load_uint(4);
+```func
+var flags = cs~load_uint(4);
+```
 
 В данном уроке мы не будем останавливаться подробно на флагах, но подробнее можно прочитать в пункте [3.1.7](https://ton-blockchain.github.io/docs/tblkch.pdf).
 
 Ну и наконец-то адрес. Используем `load_msg_addr()` - которая загружает из слайса единственный префикс, который является допустимым MsgAddress.
 
-	  slice sender_address = cs~load_msg_addr(); 
+```func
+slice sender_address = cs~load_msg_addr(); 
+```
 	  
 Получаем:
 
-	#include "imports/stdlib.fc";
+```func
+#include "imports/stdlib.fc";
 
-	() recv_internal(int msg_value, cell in_msg, slice in_msg_body) impure {
+() recv_internal(int msg_value, cell in_msg, slice in_msg_body) impure {
 
-	  if (msg_value < 10000000) { ;; 10000000 nanoton == 0.01 TON
-		return ();
-	  }
-	  
-	  slice cs = in_msg.begin_parse();
-	  int flags = cs~load_uint(4); 
-	  slice sender_address = cs~load_msg_addr(); 
+  if (msg_value < 10000000) { ;; 10000000 nanoton == 0.01 TON
+	return ();
+  }
+  
+  slice cs = in_msg.begin_parse();
+  int flags = cs~load_uint(4); 
+  slice sender_address = cs~load_msg_addr(); 
 
-	}
+}
+```
 	
 
 ##### Отправка сообщения
@@ -116,13 +130,16 @@ TON представляет собой [модель актора](https://en.w
 
 С полной структурой сообщения можно ознакомиться [здесь - message layout](https://ton-blockchain.github.io/docs/#/smart-contracts/messages?id=message-layout). Но обычно нам нет необходимости контролировать каждое поле, поэтому можно использовать краткую форму из [примера](https://ton-blockchain.github.io/docs/#/smart-contracts/messages?id=sending-messages):
 
-	 var msg = begin_cell()
-		.store_uint(0x18, 6)
-		.store_slice(addr)
-		.store_coins(amount)
-		.store_uint(0, 1 + 4 + 4 + 64 + 32 + 1 + 1)
-		.store_slice(message_body)
-	  .end_cell();
+```func
+ var msg = begin_cell()
+	.store_uint(0x18, 6)
+	.store_slice(addr)
+	.store_coins(amount)
+	.store_uint(0, 1 + 4 + 4 + 64 + 32 + 1 + 1)
+	.store_slice(message_body)
+  .end_cell();
+```
+
 
 Как вы можете видеть для построения сообщения используются функции [стандартной библиотеки FunC](https://ton-blockchain.github.io/docs/#/func/stdlib). А именно фукнции "обертки" примитивов Builder (частично построенных ячеек как вы можете помнить из первого урока). Рассмотрим:
 
@@ -136,7 +153,9 @@ TON представляет собой [модель актора](https://en.w
 
 В тело сообщения мы положим `op` и наше сообщение `reply`, чтобы положить сообщение, нужно сделать `slice`.
 
-	  slice msg_text = "reply"; 
+```func
+slice msg_text = "reply";
+```
 
 В рекомендациях о теле сообщения, есть рекомендация добавлять `op`, несмотря на то, что здесь он не будет нести, какой-то функциональности, мы его добавим.
 
@@ -146,30 +165,32 @@ TON представляет собой [модель актора](https://en.w
 
 Получим:
 
-	#include "imports/stdlib.fc";
+```func
+#include "imports/stdlib.fc";
 
-	() recv_internal(int msg_value, cell in_msg, slice in_msg_body) impure {
+() recv_internal(int msg_value, cell in_msg, slice in_msg_body) impure {
 
-	  if (msg_value < 10000000) { ;; 10000000 nanoton == 0.01 TON
-		return ();
-	  }
+  if (msg_value < 10000000) { ;; 10000000 nanoton == 0.01 TON
+	return ();
+  }
 	  
-	  slice cs = in_msg.begin_parse();
-	  int flags = cs~load_uint(4); 
-	  slice sender_address = cs~load_msg_addr(); 
+  slice cs = in_msg.begin_parse();
+  int flags = cs~load_uint(4); 
+  slice sender_address = cs~load_msg_addr(); 
 
-	  slice msg_text = "reply"; 
+  slice msg_text = "reply"; 
 
-	  cell msg = begin_cell()
-		  .store_uint(0x18, 6)
-		  .store_slice(sender_address)
-		  .store_coins(100) 
-		  .store_uint(0, 1 + 4 + 4 + 64 + 32 + 1 + 1)
-		  .store_uint(0, 32)
-		  .store_slice(msg_text) 
-	  .end_cell();
+  cell msg = begin_cell()
+	  .store_uint(0x18, 6)
+	  .store_slice(sender_address)
+	  .store_coins(100) 
+	  .store_uint(0, 1 + 4 + 4 + 64 + 32 + 1 + 1)
+	  .store_uint(0, 32)
+	  .store_slice(msg_text) 
+  .end_cell();
 
 	}
+```
 
 Сообщение готово, отправим его.
 
@@ -195,33 +216,33 @@ TON представляет собой [модель актора](https://en.w
 
 Получаем `mode` == 3, итоговый смарт-контракт:
 
+```func
+#include "imports/stdlib.fc";
 
-	#include "imports/stdlib.fc";
+() recv_internal(int msg_value, cell in_msg, slice in_msg_body) impure {
 
-	() recv_internal(int msg_value, cell in_msg, slice in_msg_body) impure {
-
-	  if (msg_value < 10000000) { ;; 10000000 nanoton == 0.01 TON
-		return ();
-	  }
+  if (msg_value < 10000000) { ;; 10000000 nanoton == 0.01 TON
+	return ();
+  }
 	  
-	  slice cs = in_msg.begin_parse();
-	  int flags = cs~load_uint(4); 
-	  slice sender_address = cs~load_msg_addr(); 
+  slice cs = in_msg.begin_parse();
+  int flags = cs~load_uint(4); 
+  slice sender_address = cs~load_msg_addr(); 
 
-	  slice msg_text = "reply"; 
+  slice msg_text = "reply"; 
 
-	  cell msg = begin_cell()
-		  .store_uint(0x18, 6)
-		  .store_slice(sender_address)
-		  .store_coins(100) 
-		  .store_uint(0, 1 + 4 + 4 + 64 + 32 + 1 + 1)
-		  .store_uint(0, 32)
-		  .store_slice(msg_text) 
-	  .end_cell();
+  cell msg = begin_cell()
+	  .store_uint(0x18, 6)
+	  .store_slice(sender_address)
+	  .store_coins(100) 
+	  .store_uint(0, 1 + 4 + 4 + 64 + 32 + 1 + 1)
+	  .store_uint(0, 32)
+	  .store_slice(msg_text) 
+  .end_cell();
 
-	  send_raw_message(msg, 3);
-	}
-	
+  send_raw_message(msg, 3);
+}
+```
 
 ## hexBoC
 
@@ -231,41 +252,43 @@ TON представляет собой [модель актора](https://en.w
 
 Так как мы изменили имя файла, нужно модернизировать и `compile.ts`:
 
-	import * as fs from "fs";
-	import { readFileSync } from "fs";
-	import process from "process";
-	import { Cell } from "ton-core";
-	import { compileFunc } from "@ton-community/func-js";
+```ts
+import * as fs from "fs";
+import { readFileSync } from "fs";
+import process from "process";
+import { Cell } from "ton-core";
+import { compileFunc } from "@ton-community/func-js";
 
-	async function compileScript() {
+async function compileScript() {
 
-		const compileResult = await compileFunc({
-			targets: ["./contracts/chatbot.fc"], 
-			sources: (path) => readFileSync(path).toString("utf8"),
-		});
+	const compileResult = await compileFunc({
+		targets: ["./contracts/chatbot.fc"], 
+		sources: (path) => readFileSync(path).toString("utf8"),
+	});
 
-		if (compileResult.status ==="error") {
-			console.log("Error happend");
-			process.exit(1);
-		}
-
-		const hexBoC = 'build/main.compiled.json';
-
-		fs.writeFileSync(
-			hexBoC,
-			JSON.stringify({
-				hex: Cell.fromBoc(Buffer.from(compileResult.codeBoc,"base64"))[0]
-					.toBoc()
-					.toString("hex"),
-			})
-
-		);
-
-		console.log("Compiled, hexBoC:"+hexBoC);
-
+	if (compileResult.status ==="error") {
+		console.log("Error happend");
+		process.exit(1);
 	}
 
-	compileScript();
+	const hexBoC = 'build/main.compiled.json';
+
+	fs.writeFileSync(
+		hexBoC,
+		JSON.stringify({
+			hex: Cell.fromBoc(Buffer.from(compileResult.codeBoc,"base64"))[0]
+				.toBoc()
+				.toString("hex"),
+		})
+
+	);
+
+	console.log("Compiled, hexBoC:"+hexBoC);
+
+}
+
+compileScript();
+```
 
 Скомпилируйте смарт-контракт командой `yarn compile`.
 
