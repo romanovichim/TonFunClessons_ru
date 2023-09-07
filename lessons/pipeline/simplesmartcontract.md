@@ -18,20 +18,21 @@
 
 Создайте папку для своего проекта и зайдите в нее.
 
-	// Windows example
-	mkdir test_folder
-	cd test_folder
-	
+```bash
+// Windows example
+mkdir test_folder
+cd test_folder
+```
 В этом туториале мы будем использовать менеджер пакетов `yarn`.
-
+```bash
 	yarn init
-	
+```
 Давайте инициализируем `yarn` и прокликаем вопросы консоли, так как это тестовый пример. После этого мы должны получить файл `package.json` в папке.
 
 Теперь добавим typescript и необходимые библиотеки. Установите их как dev dependencies:
-
-	yarn add typescript ts-node @types/node @swc/core --dev
-	
+```bash
+yarn add typescript ts-node @types/node @swc/core --dev
+```
 Создайте файл `tsconfig.json`. он нужен для конфигурации компиляции проекта. Добавим к нему:
 
 	{
@@ -52,14 +53,16 @@
 	}
 
 В этом туториале мы не будем останавливаться на том, что означает каждая строка конфигураций, потому что этот туториал посвящен смарт-контрактам. Теперь установим библиотеки, необходимые для работы с TON:
-
-	yarn add ton-core ton-crypto @ton-community/func-js  --dev
-	
+```bash
+yarn add ton-core ton-crypto @ton-community/func-js  --dev
+```
 Теперь давайте создадим смарт-контракт на FunC. Создайте папку `contracts` и файл `main.fc` с минимальным кодом:
 
-	() recv_internal(int msg_value, cell in_msg, slice in_msg_body) impure {
+```func
+() recv_internal(int msg_value, cell in_msg, slice in_msg_body) impure {
 
-	} 
+} 
+```
 
 `recv_internal` вызывается, когда смарт-контракт получает входящее внутреннее сообщение. В стеке есть некоторые переменные, когда [TVM инициирует](https://docs.ton.org/learn/tvm-instructions/tvm-overview#initialization-of-tvm), задав аргументы в recv_internal, мы даем смарт-контракт понимание кода о некоторых из них.
 
@@ -90,6 +93,8 @@
 
 Наконец мы добираемся до файла компиляции, первое, что мы делаем, это компилируем наш код с помощью функции `compileFunc`:
 
+
+```ts
 	import * as fs from "fs";
 	import { readFileSync } from "fs";
 	import process from "process";
@@ -110,47 +115,47 @@
 
 	}
 	compileScript();
-	
+```	
 Полученный hexBoС будет записан в папку:
+```ts
+import * as fs from "fs";
+import { readFileSync } from "fs";
+import process from "process";
+import { Cell } from "ton-core";
+import { compileFunc } from "@ton-community/func-js";
 
-	import * as fs from "fs";
-	import { readFileSync } from "fs";
-	import process from "process";
-	import { Cell } from "ton-core";
-	import { compileFunc } from "@ton-community/func-js";
+async function compileScript() {
 
-	async function compileScript() {
+	const compileResult = await compileFunc({
+		targets: ["./contracts/main.fc"], 
+		sources: (path) => readFileSync(path).toString("utf8"),
+	});
 
-		const compileResult = await compileFunc({
-			targets: ["./contracts/main.fc"], 
-			sources: (path) => readFileSync(path).toString("utf8"),
-		});
-
-		if (compileResult.status ==="error") {
-			console.log("Error happend");
-			process.exit(1);
-		}
-
-		const hexBoC = 'build/main.compiled.json';
-
-		fs.writeFileSync(
-			hexBoC,
-			JSON.stringify({
-				hex: Cell.fromBoc(Buffer.from(compileResult.codeBoc,"base64"))[0]
-					.toBoc()
-					.toString("hex"),
-			})
-
-		);
-
+	if (compileResult.status ==="error") {
+		console.log("Error happend");
+		process.exit(1);
 	}
 
-	compileScript();
-	
+	const hexBoC = 'build/main.compiled.json';
+
+	fs.writeFileSync(
+		hexBoC,
+		JSON.stringify({
+			hex: Cell.fromBoc(Buffer.from(compileResult.codeBoc,"base64"))[0]
+				.toBoc()
+				.toString("hex"),
+		})
+
+	);
+
+}
+
+compileScript();
+```
 Для удобства можно разбавить код `console.log()`, чтобы было понятно, что сработало, а что нет при компиляции, например, можно добавить в конец:
-
-	console.log("Compiled, hexBoC:"+hexBoC);
-
+```ts
+console.log("Compiled, hexBoC:"+hexBoC);
+```
 Который выведет полученный hexBoC.
 
 ## Перейдем к самому смарт-контракту
@@ -158,80 +163,84 @@
 Для создания контрактов нам понадобится стандартная библиотека функций FunC. Создайте папку `imports` внутри папки `contracts` и добавьте туда [этот](https://github.com/ton-blockchain/ton/blob/master/crypto/smartcont/stdlib.fc) файл.
 
 Теперь перейдите в файл `main.fc` и импортируйте библиотеку, теперь файл выглядит так:
+```func
+#include "imports/stdlib.fc";
 
-	#include "imports/stdlib.fc";
+() recv_internal(int msg_value, cell in_msg, slice in_msg_body) impure {
 
-	() recv_internal(int msg_value, cell in_msg, slice in_msg_body) impure {
-
-	} 
-
+} 
+```
 Кратко пробежимся по контракту, подробные разборы и уроки по FunC есть [здесь](https://github.com/romanovichim/TonFunClessons_ru).
 
 Смарт-контракт, который мы напишем, будет хранить адрес отправителя внутреннего сообщения, а также хранить номер один в смарт-контракте. Также будет реализован метод Get, который при вызове будет возвращать адрес последнего отправителя сообщения в контракт и единицу.
 
 В нашу функцию приходит внутреннее сообщение, оттуда мы сначала получим служебные флаги, а потом адрес отправителя, который сохраним:
+```func
+#include "imports/stdlib.fc";
 
-	#include "imports/stdlib.fc";
+() recv_internal(int msg_value, cell in_msg, slice in_msg_body) impure {
+	slice cs = in_msg.begin_parse();
+	int flags = cs~load_uint(4);
+	slice sender_address = cs~load_msg_addr();
 
-	() recv_internal(int msg_value, cell in_msg, slice in_msg_body) impure {
-		slice cs = in_msg.begin_parse();
-		int flags = cs~load_uint(4);
-		slice sender_address = cs~load_msg_addr();
-
-	} 
-
+} 
+```
 Сохраним адрес и единицу в контракте, т.е. запишем данные в регистр `c4`.
+```func
+#include "imports/stdlib.fc";
 
-	#include "imports/stdlib.fc";
+() recv_internal(int msg_value, cell in_msg, slice in_msg_body) impure {
+	slice cs = in_msg.begin_parse();
+	int flags = cs~load_uint(4);
+	slice sender_address = cs~load_msg_addr();
 
-	() recv_internal(int msg_value, cell in_msg, slice in_msg_body) impure {
-		slice cs = in_msg.begin_parse();
-		int flags = cs~load_uint(4);
-		slice sender_address = cs~load_msg_addr();
-
-		set_data(begin_cell().store_slice(sender_address).store_uint(1,32).end_cell());
-	} 
-
+	set_data(begin_cell().store_slice(sender_address).store_uint(1,32).end_cell());
+} 
+```
 Пришло время метода Get, метод вернет адрес и число, поэтому начнем с `(slice,int)`
+```func
+(slice,int) get_sender() method_id {
 
-	(slice,int) get_sender() method_id {
-
-	}
-
+}
+```
 В самом методе получаем данные из регистра и возвращаем их пользователю:
+```func
+#include "imports/stdlib.fc";
 
-	#include "imports/stdlib.fc";
+() recv_internal(int msg_value, cell in_msg, slice in_msg_body) impure {
+	slice cs = in_msg.begin_parse();
+	int flags = cs~load_uint(4);
+	slice sender_address = cs~load_msg_addr();
 
-	() recv_internal(int msg_value, cell in_msg, slice in_msg_body) impure {
-		slice cs = in_msg.begin_parse();
-		int flags = cs~load_uint(4);
-		slice sender_address = cs~load_msg_addr();
+	set_data(begin_cell().store_slice(sender_address).store_uint(1,32).end_cell());
+} 
 
-		set_data(begin_cell().store_slice(sender_address).store_uint(1,32).end_cell());
-	} 
-
-	(slice,int) get_sender() method_id {
-		slice ds = get_data().begin_parse();
-		return (ds~load_msg_addr(),ds~load_uint(32));
-	}
+(slice,int) get_sender() method_id {
+	slice ds = get_data().begin_parse();
+	return (ds~load_msg_addr(),ds~load_uint(32));
+}
+```
 	
 
 Финальная версия:
 
-	#include "imports/stdlib.fc";
+```func
+#include "imports/stdlib.fc";
 
-	() recv_internal(int msg_value, cell in_msg, slice in_msg_body) impure {
-		slice cs = in_msg.begin_parse();
-		int flags = cs~load_uint(4);
-		slice sender_address = cs~load_msg_addr();
+() recv_internal(int msg_value, cell in_msg, slice in_msg_body) impure {
+	slice cs = in_msg.begin_parse();
+	int flags = cs~load_uint(4);
+	slice sender_address = cs~load_msg_addr();
 
-		set_data(begin_cell().store_slice(sender_address).store_uint(1,32).end_cell());
-	} 
+	set_data(begin_cell().store_slice(sender_address).store_uint(1,32).end_cell());
+} 
 
-	(slice,int) get_sender() method_id {
-		slice ds = get_data().begin_parse();
-		return (ds~load_msg_addr(),ds~load_uint(32));
-	}
+(slice,int) get_sender() method_id {
+	slice ds = get_data().begin_parse();
+	return (ds~load_msg_addr(),ds~load_uint(32));
+}
+```
+
 	
 Запускаем компиляцию с помощью команды `yarn compile` и получаем файл c `main.compiled.json` в папке `build`:
 
